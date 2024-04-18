@@ -9,3 +9,4 @@ export * from './DeviceItem';
 export * from './TenantItem';
 export * from './Room';
 export * from './SearchBar';
+export * from './Invoice';
