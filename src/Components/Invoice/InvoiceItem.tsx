@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, Button, DataTable } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -8,6 +9,7 @@ import {
 
 import theme from '../../Theme';
 import { ItfInvoiceItem, ItfInvoiceMoney } from '.';
+import { RootScreens } from '../../Constants/RootScreen';
 
 const toVietnamCurrency = (input: number | string) => {
   return input.toLocaleString('it-IT', {
@@ -17,6 +19,8 @@ const toVietnamCurrency = (input: number | string) => {
 };
 
 export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
+  const navigation = useNavigation();
+
   const [isExpanded, setIsExpanded] = React.useState(false);
   const styles = StyleSheet.create({
     cardTitle: {
@@ -33,6 +37,11 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
     },
   });
 
+  const onPayment = () => {
+    navigation.navigate(RootScreens.PAYMENT as never);
+    // navigation.navigate(RootScreens.PAYMENT, { name: 'Payment' });
+  };
+
   return (
     <Card style={{ width: wp(90), margin: wp(1) }}>
       <Card.Content>
@@ -47,9 +56,7 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
         <Text>{toVietnamCurrency(item.price)}</Text>
       </Card.Content>
       <Card.Actions>
-        {!item.paidStatus && (
-          <Button onPress={() => console.log('hihi')}>Thanh toán</Button>
-        )}
+        {!item.paidStatus && <Button onPress={onPayment}>Thanh toán</Button>}
       </Card.Actions>
 
       {!isExpanded && (
