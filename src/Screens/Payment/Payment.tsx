@@ -6,10 +6,12 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Header, ItfInvoiceMoney } from '../../Components';
 import { useAppTheme } from '../../Theme';
 import { PaymentModal } from '../../Components/Payment';
+import { useGetDeepLinksQuery } from '../../Services';
 
 const toVietnamCurrency = (input: number | string) => {
   return input.toLocaleString('it-IT', {
@@ -43,7 +45,9 @@ export const Payment = () => {
   };
 
   // anothers
+  const { data } = useGetDeepLinksQuery({ os: 'ios' });
   const theme = useAppTheme();
+  const navigator = useNavigation();
   const styles = StyleSheet.create({
     dataTable: {
       borderStyle: 'solid',
@@ -70,8 +74,6 @@ export const Payment = () => {
       width: wp(80),
     },
   });
-
-  const navigator = useNavigation();
 
   // functions
   const onBack = () => navigator.goBack();
@@ -188,7 +190,7 @@ export const Payment = () => {
         showModal && (
           <PaymentModal
             uri={qrUrl}
-            bankDeeplink={`https://dl.vietqr.io/pay?app=${bank}&am=${invoiceData.price}&ba=${bankAccount}@${bank}`}
+            bankDeeplinks={data}
             bankAccount={bankAccount}
             hideModal={() => setShowModal(false)}
             paymentMethod={paymentMethods[checked]}

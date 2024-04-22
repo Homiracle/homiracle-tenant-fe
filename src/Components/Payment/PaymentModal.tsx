@@ -1,29 +1,30 @@
 import React, { useState } from 'react';
-import { Image, Linking, StyleSheet, TouchableHighlight } from 'react-native';
+import { Image, Linking, StyleSheet } from 'react-native';
 import { Dropdown } from 'react-native-searchable-dropdown-kj';
 import * as Clipboard from 'expo-clipboard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { ModalCustom } from '../Modal';
-import { useGetDeepLinksQuery } from '../../Services';
+import { ItfDeeplink } from '../../Services/payment/interface';
 
 interface ItfProps {
   uri: string;
   paymentMethod: string;
-  bankDeeplink: string;
+  bankDeeplinks?: ItfDeeplink;
   bankAccount: number;
   hideModal: () => void;
 }
 
 export const PaymentModal = ({
   uri,
-  bankDeeplink,
+  bankDeeplinks,
   bankAccount,
   paymentMethod,
   hideModal,
 }: ItfProps) => {
   const [value, setValue] = useState('');
   const [isFocus, setIsFocus] = useState(false);
-  const [deeplinks, setDeeplinks] = useState([]);
+  const [deeplinks, setDeeplinks] = useState<ItfDeeplink>();
 
   const styles = StyleSheet.create({
     dropdown: {
@@ -64,11 +65,11 @@ export const PaymentModal = ({
         // selectedTextStyle={styles.selectedTextStyle}
         // inputSearchStyle={styles.inputSearchStyle}
         // iconStyle={styles.iconStyle}
-        data={deeplinks}
+        data={bankDeeplinks!.apps}
         search
         maxHeight={300}
-        labelField='label'
-        valueField='value'
+        labelField='bankName'
+        valueField='appId'
         placeholder={isFocus ? value : 'Tìm ngân hàng'}
         value={value}
         onFocus={() => setIsFocus(true)}

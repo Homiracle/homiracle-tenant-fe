@@ -1,0 +1,13 @@
+interface ItfDeeplinkBank {
+  appId: string;
+  appLogo: string;
+  appName: string;
+  bankName: string;
+  monthlyInstall: number;
+  deeplink: string;
+}
+
+export interface ItfDeeplink {
+  total: number,
+  apps: ItfDeeplinkBank[],
+}
