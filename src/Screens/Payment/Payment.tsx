@@ -29,8 +29,10 @@ export const Payment = () => {
   );
 
   // constants
-  const bank = 'tpb';
-  const bankAccount = 10393455850;
+  const bank = {
+    name: 'tpb',
+    account: 10393455850,
+  };
   const paymentMethods = ['VietQR', 'Zalo Pay'];
   const invoiceData = {
     id: '3',
@@ -77,29 +79,6 @@ export const Payment = () => {
 
   // functions
   const onBack = () => navigator.goBack();
-
-  async function getQR() {
-    const resp = await fetch('https://api.vietqr.io/v2/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-client-id': '33869af8-7e3c-4e7f-8c19-be0bf88d8a9c',
-        'x-api-key': '4eea5597-4bc8-4f6f-ac30-66cd532cc9d2',
-      },
-      body: JSON.stringify({
-        accountNo: bankAccount,
-        accountName: 'SNORLAX LUOI BIENG',
-        acqId: 970423, // tpb
-        amount: 10000,
-        addInfo: '',
-        format: 'text',
-        template: 'print',
-      }),
-    });
-
-    const data = await resp.json();
-    return data.code === '00' ? data.data.qrDataURL : null;
-  }
 
   const onProceedPayment = async () => {
     switch (checked) {
@@ -191,7 +170,8 @@ export const Payment = () => {
           <PaymentModal
             uri={qrUrl}
             bankDeeplinks={data}
-            bankAccount={bankAccount}
+            bank={bank}
+            price={invoiceData.price}
             hideModal={() => setShowModal(false)}
             paymentMethod={paymentMethods[checked]}
           />

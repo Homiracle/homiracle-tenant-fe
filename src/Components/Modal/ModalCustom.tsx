@@ -28,8 +28,8 @@ export const ModalCustom = (props: ItfProps) => {
     dialog: {
       backgroundColor: theme.colors.background,
       borderRadius: 10,
-      width: wp(80),
-      marginLeft: wp(10),
+      width: wp(88),
+      marginLeft: wp(6),
       paddingHorizontal: wp(5),
       display: 'flex',
     },
