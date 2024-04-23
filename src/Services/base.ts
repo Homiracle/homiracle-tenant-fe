@@ -87,6 +87,6 @@ const baseQueryWithInterceptor: BaseQueryFn<
 
 export const API = createApi({
   baseQuery: baseQueryWithInterceptor,
-  tagTypes: ['RoomingHouse', 'Device'],
+  tagTypes: ['RoomingHouse', 'Device', 'Attendance'],
   endpoints: () => ({}),
 });
