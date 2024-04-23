@@ -59,7 +59,13 @@ export const RoomList = ({ status }: { status: AttendanceStatus }) => {
                       flexGrow: 1,
                     }}
                   >
-                    <Text variant='bodyLarge'>{item.name}</Text>
+                    <Text
+                      variant='bodyLarge'
+                      ellipsizeMode='tail'
+                      numberOfLines={1}
+                    >
+                      {item.name}
+                    </Text>
                     <Text
                       variant='bodySmall'
                       ellipsizeMode='tail'
@@ -78,6 +84,7 @@ export const RoomList = ({ status }: { status: AttendanceStatus }) => {
                         style={{
                           flexDirection: 'row',
                           gap: 2,
+                          flexGrow: 1,
                         }}
                       >
                         <Icon
@@ -91,6 +98,8 @@ export const RoomList = ({ status }: { status: AttendanceStatus }) => {
                         <Text
                           variant='bodyMedium'
                           style={{ color: theme.colors.primary }}
+                          ellipsizeMode='middle'
+                          numberOfLines={0}
                         >
                           {item.number_of_devices + ' thiết bị'}
                         </Text>
@@ -99,6 +108,7 @@ export const RoomList = ({ status }: { status: AttendanceStatus }) => {
                         style={{
                           flexDirection: 'row',
                           gap: 2,
+                          flexGrow: 1,
                         }}
                       >
                         <Icon
@@ -112,6 +122,8 @@ export const RoomList = ({ status }: { status: AttendanceStatus }) => {
                         <Text
                           variant='bodyMedium'
                           style={{ color: theme.colors.primary }}
+                          ellipsizeMode='tail'
+                          numberOfLines={1}
                         >
                           {item.number_of_tenants + ' người'}
                         </Text>
