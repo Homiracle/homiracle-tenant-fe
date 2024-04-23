@@ -71,7 +71,7 @@ export const Home = ({ route, navigation }: HomeScreenNavigatorProps) => {
             fontWeight: 'bold',
             marginBottom: 12,
           }}
-          variant='titleLarge'
+          variant='titleMedium'
         >
           Chung
         </Text>
@@ -111,7 +111,7 @@ export const Home = ({ route, navigation }: HomeScreenNavigatorProps) => {
             fontWeight: 'bold',
             marginVertical: 12,
           }}
-          variant='titleLarge'
+          variant='titleMedium'
         >
           Thiết bị
         </Text>
