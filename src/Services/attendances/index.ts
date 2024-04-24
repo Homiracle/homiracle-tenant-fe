@@ -16,7 +16,6 @@ const attendanceApi = API.injectEndpoints({
     >({
       query: status => `attendances/tenant?src=${status}`,
       transformResponse: (response: Attendance[]) => {
-        console.log('hhhhhhhhhhhhhhhhhhhhh');
         return response.map(item => ({
           id: item.attendance.attendance_id,
           name:
@@ -39,9 +38,15 @@ const attendanceApi = API.injectEndpoints({
     }),
     acceptRoom: build.mutation<Attendance, number>({
       query: id => ({
-        url: `attendances/${id}`,
+        url: `attendances/${id}/accept`,
         method: 'PATCH',
-        body: { status: 'accepted' },
+      }),
+      invalidatesTags: ['Attendance'],
+    }),
+    denyRoom: build.mutation<Attendance, number>({
+      query: id => ({
+        url: `attendances/${id}/deny`,
+        method: 'PATCH',
       }),
       invalidatesTags: ['Attendance'],
     }),
@@ -49,4 +54,8 @@ const attendanceApi = API.injectEndpoints({
   overrideExisting: true,
 });
 
-export const { useGetAcceptedRoomsQuery } = attendanceApi;
+export const {
+  useGetAcceptedRoomsQuery,
+  useAcceptRoomMutation,
+  useDenyRoomMutation,
+} = attendanceApi;
