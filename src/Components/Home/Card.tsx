@@ -28,8 +28,8 @@ export const CardCustom = ({
     <Card
       style={{
         flex: 1,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
+        // borderWidth: 1,
+        // borderColor: theme.colors.primary,
         backgroundColor: 'white',
       }}
     >

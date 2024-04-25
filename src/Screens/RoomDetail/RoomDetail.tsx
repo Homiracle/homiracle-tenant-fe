@@ -1,227 +1,85 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { RoomDetailScreenNavigatorProps } from './RoomDetailContainer';
 import { useAppTheme } from '../../Theme';
 import { StyleSheet, View } from 'react-native';
-import { CustomDialog, Header } from '../../Components';
+import { CustomDialog, Header, TabButton, TabView } from '../../Components';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import { Button, DataTable, Portal, Surface, Text } from 'react-native-paper';
+import { Portal } from 'react-native-paper';
 import { AttendanceStatus } from '../../Constants/AttendanceStatus';
-import {
-  useAcceptRoomMutation,
-  useDenyRoomMutation,
-} from '../../Services/attendances';
+import { RoomInfo } from './RoomInfo';
+import { Device } from './Device';
 
 export const RoomDetail = ({
   route,
   navigation,
 }: RoomDetailScreenNavigatorProps) => {
-  const theme = useAppTheme();
   const tabName = route.params.screenName;
-  const styles = StyleSheet.create({
-    surface: {
-      flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: theme.colors.onPrimary,
-      marginHorizontal: wp(2),
-      borderRadius: wp(2),
-      width: wp(96),
-      paddingHorizontal: wp(4),
-      paddingTop: hp(1),
-      paddingBottom: hp(2),
-      marginBottom: tabName !== AttendanceStatus.INVITING ? hp(2) : 0,
-    },
-    deny: {
-      borderColor: theme.colors.error,
-      borderWidth: 1,
-      borderRadius: 10,
-      backgroundColor: theme.colors.background,
-      width: wp(30),
-    },
-    accept: {
-      borderColor: theme.colors.primary,
-      borderWidth: 1,
-      borderRadius: 10,
-      backgroundColor: theme.colors.background,
-      width: wp(30),
-    },
-  });
-
   const name = route.params.name;
   const id = route.params.id;
 
-  const [acceptRoom, { isSuccess, isLoading, error }] = useAcceptRoomMutation();
-
-  const handleAcceptRoom = () => {
-    acceptRoom(id);
-  };
-
-  useEffect(() => {
-    if (error) {
-      console.log(error);
-    }
-  }, [error]);
-
+  const tabs = ['Thông tin hợp đồng', 'Thiết bị', 'Thành viên'];
+  const [activeTab, setActiveTab] = React.useState(
+    tabName === AttendanceStatus.ACCEPTED ? 0 : 1,
+  );
   const [isOk, setIsOk] = React.useState(false);
   const [isAccept, setIsAccept] = React.useState(true);
-  useEffect(() => {
-    if (isSuccess) {
-      setIsOk(true);
-      console.log('Accept room successfully');
-    }
-  }, [isSuccess]);
 
-  const [
-    denyRoom,
-    { isSuccess: denySuccess, isLoading: denyLoading, error: denyError },
-  ] = useDenyRoomMutation();
-
-  const handleDenyRoom = () => {
-    setIsAccept(false);
-    denyRoom(id);
+  const focusInfo = () => {
+    setActiveTab(1);
   };
 
-  useEffect(() => {
-    if (denyError) {
-      console.log(denyError);
-    }
-  }, [denyError]);
+  const focusDevice = () => {
+    setActiveTab(0);
+  };
 
-  useEffect(() => {
-    if (denySuccess) {
-      setIsOk(true);
-      console.log('Deny room successfully');
-    }
-  }, [denySuccess]);
+  const focusTenant = () => {
+    setActiveTab(2);
+  };
 
   return (
     <View style={{ flex: 1 }}>
       <Header
         title={name}
-        height={hp(6)}
+        height={hp(2)}
         mode='center-aligned'
-        scroll='vertical'
+        // scroll='vertical'
         onBack={() => navigation.goBack()}
-      >
-        <Surface style={styles.surface}>
-          <DataTable style={{ width: wp(96) }}>
-            {/* Bên cho thuê */}
-            <DataTable.Header>
-              <DataTable.Title>
-                <Text
-                  variant='bodyLarge'
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
-                >
-                  Bên cho thuê
-                </Text>
-              </DataTable.Title>
-            </DataTable.Header>
-            <DataTable.Row>
-              <DataTable.Cell>Tên</DataTable.Cell>
-              <DataTable.Cell numeric>20 m2</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Email</DataTable.Cell>
-              <DataTable.Cell numeric>20 m2</DataTable.Cell>
-            </DataTable.Row>
-            {/* Bên thuê */}
-            <DataTable.Header>
-              <DataTable.Title>
-                <Text
-                  variant='bodyLarge'
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
-                >
-                  Bên thuê
-                </Text>
-              </DataTable.Title>
-            </DataTable.Header>
-            <DataTable.Row>
-              <DataTable.Cell>Tên</DataTable.Cell>
-              <DataTable.Cell numeric>20 m2</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Email</DataTable.Cell>
-              <DataTable.Cell numeric>20 m2</DataTable.Cell>
-            </DataTable.Row>
-            {/* Thông tin cho thuê */}
-            <DataTable.Header style={{ borderColor: 'transparent' }}>
-              <DataTable.Title>
-                <Text
-                  variant='bodyLarge'
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
-                >
-                  Thông tin cho thuê
-                </Text>
-              </DataTable.Title>
-            </DataTable.Header>
-            <DataTable.Row style={{ borderColor: 'transparent' }}>
-              <DataTable.Cell>Phòng</DataTable.Cell>
-              <DataTable.Cell numeric>{name}</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-            <DataTable.Row>
-              <DataTable.Cell>Số lượng người ở tối đa</DataTable.Cell>
-              <DataTable.Cell numeric>20</DataTable.Cell>
-            </DataTable.Row>
-          </DataTable>
-        </Surface>
-        {/* Button */}
-        {tabName === AttendanceStatus.INVITING && (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              gap: wp(10),
-              marginVertical: hp(2),
-            }}
-          >
-            <Button
-              mode='outlined'
-              style={styles.deny}
-              textColor={theme.colors.error}
-              onPress={handleDenyRoom}
-              loading={denyLoading}
-            >
-              Từ chối
-            </Button>
-            <Button
-              mode='outlined'
-              style={styles.accept}
-              onPress={handleAcceptRoom}
-              loading={isLoading}
-            >
-              Đồng ý
-            </Button>
-          </View>
+      />
+      <TabView>
+        {tabName === AttendanceStatus.ACCEPTED && (
+          <TabButton
+            isClicked={activeTab === 0}
+            name={tabs[1]}
+            displayNumber={false}
+            onFocus={focusDevice}
+          />
         )}
-      </Header>
+        <TabButton
+          isClicked={activeTab === 1}
+          name={tabs[0]}
+          displayNumber={false}
+          onFocus={focusInfo}
+        />
+        <TabButton
+          isClicked={activeTab === 2}
+          name={tabs[2]}
+          displayNumber={false}
+          onFocus={focusTenant}
+        />
+      </TabView>
+      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <Device />}
+      {activeTab === 1 && (
+        <RoomInfo
+          tabName={tabName}
+          id={id}
+          setIsOk={setIsOk}
+          setIsAccept={setIsAccept}
+        />
+      )}
+
       <Portal>
         <CustomDialog
           visible={isOk}

@@ -62,7 +62,11 @@ export const Room = ({ route, navigation }: RoomScreenNavigatorProps) => {
         />
       </TabView>
       {activeTab === 0 && (
-        <RoomList status={AttendanceStatus.ACCEPTED} navigation={navigation} />
+        <RoomList
+          status={AttendanceStatus.ACCEPTED}
+          navigation={navigation}
+          tabName={AttendanceStatus.ACCEPTED}
+        />
       )}
       {activeTab === 1 && (
         <RoomList
@@ -72,10 +76,18 @@ export const Room = ({ route, navigation }: RoomScreenNavigatorProps) => {
         />
       )}
       {activeTab === 2 && (
-        <RoomList status={AttendanceStatus.EXPIRED} navigation={navigation} />
+        <RoomList
+          status={AttendanceStatus.EXPIRED}
+          navigation={navigation}
+          tabName={AttendanceStatus.EXPIRED}
+        />
       )}
       {activeTab === 3 && (
-        <RoomList status={AttendanceStatus.DENIED} navigation={navigation} />
+        <RoomList
+          status={AttendanceStatus.DENIED}
+          navigation={navigation}
+          tabName={AttendanceStatus.DENIED}
+        />
       )}
     </View>
   );
