@@ -9,6 +9,8 @@ import { ApplicationNavigator } from './Navigation';
 import theme from './Theme';
 import { PaperProvider } from 'react-native-paper';
 import { LogBox } from 'react-native';
+import ErrorBoundary from 'react-native-error-boundary';
+
 
 // language
 i18n.locale = Localization.locale;
@@ -23,11 +25,13 @@ export default function App() {
   return (
     <NativeBaseProvider>
       <Provider store={store}>
-        <PaperProvider theme={theme}>
-          <PersistGate loading={null} persistor={persistor}>
-            <ApplicationNavigator />
-          </PersistGate>
-        </PaperProvider>
+        <ErrorBoundary>
+          <PaperProvider theme={theme}>
+            <PersistGate loading={null} persistor={persistor}>
+              <ApplicationNavigator />
+            </PersistGate>
+          </PaperProvider>
+        </ErrorBoundary>
       </Provider>
     </NativeBaseProvider>
   );
