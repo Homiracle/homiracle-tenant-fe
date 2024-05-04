@@ -6,12 +6,11 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Header, ItfInvoiceMoney } from '../../Components';
 import { useAppTheme } from '../../Theme';
 import { PaymentModal } from '../../Components/Payment';
-import { useGetDeepLinksQuery } from '../../Services';
+import { useGetDeepLinksQuery, useGetQrMutation } from '../../Services';
 
 const toVietnamCurrency = (input: number | string) => {
   return input.toLocaleString('it-IT', {
@@ -33,7 +32,7 @@ export const Payment = () => {
     name: 'tpb',
     account: 10393455850,
   };
-  const paymentMethods = ['VietQR', 'Zalo Pay'];
+  const paymentMethods = ['VietQR', 'VNPay'];
   const invoiceData = {
     id: '3',
     name: 'Tiền nhà tháng 11/2023',
@@ -47,7 +46,8 @@ export const Payment = () => {
   };
 
   // anothers
-  const { data } = useGetDeepLinksQuery({ os: 'ios' });
+  const { data: deeplinks } = useGetDeepLinksQuery({ os: 'android' });
+  const [getQr, { data: vietQr }] = useGetQrMutation();
   const theme = useAppTheme();
   const navigator = useNavigation();
   const styles = StyleSheet.create({
@@ -84,14 +84,23 @@ export const Payment = () => {
     switch (checked) {
       case 0:
         // VietQR
-        // const qrUrl = await getQR();
-        // if (qrUrl) {
-        // setQRUrl(qrUrl);
+        getQr({ amount: invoiceData.price });
         setShowModal(true);
-        // }
+        break;
+
+      case 1:
+        // VNPay
+        alert('Phương thức này đang được phát triển...');
         break;
     }
   };
+
+  React.useEffect(() => {
+    if (vietQr) {
+      const { code, data } = vietQr;
+      code === '00' && setQRUrl(data.qrDataURL);
+    }
+  }, [vietQr]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -169,7 +178,7 @@ export const Payment = () => {
         showModal && (
           <PaymentModal
             uri={qrUrl}
-            bankDeeplinks={data}
+            bankDeeplinks={deeplinks}
             bank={bank}
             price={invoiceData.price}
             hideModal={() => setShowModal(false)}

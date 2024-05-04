@@ -89,7 +89,7 @@ export const PaymentModal = ({
           // selectedTextStyle={styles.selectedTextStyle}
           // inputSearchStyle={styles.inputSearchStyle}
           // iconStyle={styles.iconStyle}
-          data={bankDeeplinks!.apps}
+          data={bankDeeplinks?.apps || []}
           search
           maxHeight={300}
           labelField='bankName'

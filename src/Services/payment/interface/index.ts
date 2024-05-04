@@ -11,3 +11,9 @@ export interface ItfDeeplink {
   total: number,
   apps: ItfDeeplinkBank[],
 }
+
+export interface ItfQrResult {
+  code: string,
+  desc: string,
+  data: { qrCode: string, qrDataURL: string }
+}
