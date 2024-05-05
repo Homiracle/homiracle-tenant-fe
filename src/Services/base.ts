@@ -65,7 +65,7 @@ const baseQueryWithInterceptor: BaseQueryFn<
           // retry the initial query
           result = await baseQuery(args, api, {
             headers: {
-              Authorization: `Bearer ${() => {(api.getState() as RootState).auth.accessToken}}`,
+              Authorization: `Bearer ${() => { (api.getState() as RootState).auth.accessToken }}`,
             },
           });
         } else {
@@ -87,6 +87,6 @@ const baseQueryWithInterceptor: BaseQueryFn<
 
 export const API = createApi({
   baseQuery: baseQueryWithInterceptor,
-  tagTypes: ['RoomingHouse', 'Device', 'Attendance'],
+  tagTypes: ['RoomingHouse', 'Device', 'Attendance', 'Payment'],
   endpoints: () => ({}),
 });
