@@ -8,8 +8,9 @@ import {
 } from 'react-native-responsive-screen';
 import { RoomList } from './RoomList';
 import { AttendanceStatus } from '../../Constants/AttendanceStatus';
+import { RoomScreenNavigatorProps } from './RoomContainer';
 
-export const Room = () => {
+export const Room = ({ route, navigation }: RoomScreenNavigatorProps) => {
   const theme = useAppTheme();
   const tabs = ['Đang ở', 'Chờ chấp nhận', 'Đã hết hạn', 'Bị từ chối'];
 
@@ -60,10 +61,34 @@ export const Room = () => {
           onFocus={focusRejectedRoom}
         />
       </TabView>
-      {activeTab === 0 && <RoomList status={AttendanceStatus.ACCEPTED} />}
-      {activeTab === 1 && <RoomList status={AttendanceStatus.INVITING} />}
-      {activeTab === 2 && <RoomList status={AttendanceStatus.EXPIRED} />}
-      {activeTab === 3 && <RoomList status={AttendanceStatus.DENIED} />}
+      {activeTab === 0 && (
+        <RoomList
+          status={AttendanceStatus.ACCEPTED}
+          navigation={navigation}
+          tabName={AttendanceStatus.ACCEPTED}
+        />
+      )}
+      {activeTab === 1 && (
+        <RoomList
+          status={AttendanceStatus.INVITING}
+          navigation={navigation}
+          tabName={AttendanceStatus.INVITING}
+        />
+      )}
+      {activeTab === 2 && (
+        <RoomList
+          status={AttendanceStatus.EXPIRED}
+          navigation={navigation}
+          tabName={AttendanceStatus.EXPIRED}
+        />
+      )}
+      {activeTab === 3 && (
+        <RoomList
+          status={AttendanceStatus.DENIED}
+          navigation={navigation}
+          tabName={AttendanceStatus.DENIED}
+        />
+      )}
     </View>
   );
 };

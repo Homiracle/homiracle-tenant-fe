@@ -12,4 +12,5 @@ export enum RootScreens {
   NOTIFICATION = 'Notification',
   INVOICE = 'Invoice',
   PAYMENT = 'Payment',
+  ROOM_DETAIL = 'RoomDetail',
 }

@@ -26,7 +26,7 @@ export const TabNavigator = () => {
         headerShown: false,
       }}
     >
-      <Tab.Screen
+      {/* <Tab.Screen
         name='HomeStack'
         component={HomeStack}
         options={{
@@ -35,7 +35,7 @@ export const TabNavigator = () => {
             <Icon name='view-dashboard-outline' size={size} color={color} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name='RoomStack'
         component={RoomStack}

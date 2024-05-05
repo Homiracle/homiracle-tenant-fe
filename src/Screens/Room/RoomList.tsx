@@ -1,3 +1,4 @@
+import { RootScreens } from '../../Constants/RootScreen';
 import { AttendanceStatus } from '../../Constants/AttendanceStatus';
 import { useGetAcceptedRoomsQuery } from '../../Services/attendances';
 import { useAppTheme } from '../../Theme';
@@ -10,7 +11,15 @@ import {
 } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export const RoomList = ({ status }: { status: AttendanceStatus }) => {
+export const RoomList = ({
+  status,
+  navigation,
+  tabName,
+}: {
+  status: AttendanceStatus;
+  navigation: any;
+  tabName?: string;
+}) => {
   const theme = useAppTheme();
 
   const { data, isSuccess, isLoading } = useGetAcceptedRoomsQuery(status);
@@ -40,6 +49,14 @@ export const RoomList = ({ status }: { status: AttendanceStatus }) => {
                   borderRadius: 10,
                   padding: 10,
                 }}
+                onPress={() =>
+                  navigation.navigate(RootScreens.ROOM_DETAIL, {
+                    attendance_id: item.id,
+                    room_id: item.room_id,
+                    name: item.name,
+                    screenName: tabName,
+                  })
+                }
               >
                 <View style={{ flexDirection: 'row', gap: wp(4) }}>
                   <Image

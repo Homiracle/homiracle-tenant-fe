@@ -2,6 +2,7 @@ import { useAppTheme } from '../../Theme';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
+import { widthPercentageToDP } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export type CardCustomProps = {
@@ -27,9 +28,7 @@ export const CardCustom = ({
   return (
     <Card
       style={{
-        flex: 1,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
+        width: widthPercentageToDP(46),
         backgroundColor: 'white',
       }}
     >
