@@ -7,6 +7,7 @@ const attendanceApi = API.injectEndpoints({
     getAcceptedRooms: build.query<
       {
         id: number;
+        room_id: string;
         name: string;
         address: string;
         number_of_devices: number;
@@ -18,6 +19,7 @@ const attendanceApi = API.injectEndpoints({
       transformResponse: (response: AttendanceData[]) => {
         return response.map(item => ({
           id: item.attendance.attendance_id,
+          room_id: item.attendance.contract.room.room_id,
           name:
             item.attendance.contract.room.rooming_house.name +
             ' - ' +

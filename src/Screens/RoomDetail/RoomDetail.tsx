@@ -10,7 +10,7 @@ import {
 import { Portal } from 'react-native-paper';
 import { AttendanceStatus } from '../../Constants/AttendanceStatus';
 import { RoomInfo } from './RoomInfo';
-import { Device } from './Device';
+import { DeviceComponent } from './Device';
 
 export const RoomDetail = ({
   route,
@@ -18,7 +18,8 @@ export const RoomDetail = ({
 }: RoomDetailScreenNavigatorProps) => {
   const tabName = route.params.screenName;
   const name = route.params.name;
-  const id = route.params.id;
+  const attendance_id = route.params.attendance_id;
+  const room_id = route.params.room_id;
 
   const tabs = ['Thông tin hợp đồng', 'Thiết bị', 'Thành viên'];
   const [activeTab, setActiveTab] = React.useState(
@@ -70,11 +71,11 @@ export const RoomDetail = ({
           onFocus={focusTenant}
         />
       </TabView>
-      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <Device />}
+      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <DeviceComponent id={attendance_id} />}
       {activeTab === 1 && (
         <RoomInfo
           tabName={tabName}
-          id={id}
+          id={attendance_id}
           setIsOk={setIsOk}
           setIsAccept={setIsAccept}
         />

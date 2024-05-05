@@ -51,7 +51,8 @@ export const RoomList = ({
                 }}
                 onPress={() =>
                   navigation.navigate(RootScreens.ROOM_DETAIL, {
-                    id: item.id,
+                    attendance_id: item.id,
+                    room_id: item.room_id,
                     name: item.name,
                     screenName: tabName,
                   })
