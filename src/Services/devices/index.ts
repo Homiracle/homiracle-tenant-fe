@@ -1,22 +1,12 @@
 import { API } from '../base';
-import { CreateDevice, CreateDeviceResponse, ListDevice } from './type';
+import { IoTAPI } from './base';
+import { ListDevice } from './type';
 
 const deviceApi = API.injectEndpoints({
   endpoints: build => ({
-    createDevice: build.mutation<CreateDevice, Partial<CreateDeviceResponse>>({
-      query: data => ({
-        url: 'iot-devices',
-        method: 'POST',
-        body: data,
-      }),
-      invalidatesTags: ['Device'],
-    }),
-    getDevices: build.query<
-      ListDevice,
-      { accessable_scope: string; accessable_scope_id: string }
-    >({
-      query: ({ accessable_scope, accessable_scope_id }) => ({
-        url: `iot-devices?accessable_scope=${accessable_scope}&accessable_scope_id=${accessable_scope_id}`,
+    getDevices: build.query<ListDevice, number>({
+      query: (attendance_id) => ({
+        url: `iot-devices/tenant?attendance_id=${attendance_id}`,
         method: 'GET',
       }),
       providesTags: ['Device'],
@@ -25,4 +15,14 @@ const deviceApi = API.injectEndpoints({
   overrideExisting: true,
 });
 
-export const { useCreateDeviceMutation, useGetDevicesQuery } = deviceApi;
+const IotDeviceApi = IoTAPI.injectEndpoints({
+  endpoints: build => ({
+    getDataIotDevices: build.query<any, string>({
+      query: id => `devices/${id}/data/latest`,
+    }),
+  }),
+  overrideExisting: true,
+});
+
+export const { useGetDevicesQuery } = deviceApi;
+export const { useLazyGetDataIotDevicesQuery } = IotDeviceApi;

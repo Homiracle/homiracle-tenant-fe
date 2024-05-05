@@ -5,10 +5,11 @@ import { useAppTheme } from '../../Theme';
 
 export interface DialogProps {
   visible: boolean;
-  title: string;
-  content: string;
-  onDismiss: () => void;
+  title?: string;
+  content?: string;
+  onDismiss?: () => void;
   onConfirm: () => void;
+  confirmContent?: string;
 }
 
 export const CustomDialog: React.FC<DialogProps> = ({
@@ -17,6 +18,7 @@ export const CustomDialog: React.FC<DialogProps> = ({
   content,
   onDismiss,
   onConfirm,
+  confirmContent = 'Xác nhận',
 }) => {
   const theme = useAppTheme();
 
@@ -47,13 +49,19 @@ export const CustomDialog: React.FC<DialogProps> = ({
   return (
     <View style={styles.container}>
       <Dialog visible={visible} onDismiss={onDismiss}>
-        <Dialog.Title style={styles.title}>{title}</Dialog.Title>
-        <Dialog.Content>
-          <Text style={styles.content}>{content}</Text>
-        </Dialog.Content>
+        {title && <Dialog.Title style={styles.title}>{title}</Dialog.Title>}
+        {content && (
+          <Dialog.Content>
+            <Text style={styles.content}>{content}</Text>
+          </Dialog.Content>
+        )}
         <Dialog.Actions>
-          <Button onPress={onDismiss} textColor={theme.colors.error}>Hủy</Button>
-          <Button onPress={onConfirm}>Xác nhận</Button>
+          {onDismiss && (
+            <Button onPress={onDismiss} textColor={theme.colors.error}>
+              Hủy
+            </Button>
+          )}
+          <Button onPress={onConfirm}>{confirmContent}</Button>
         </Dialog.Actions>
       </Dialog>
     </View>

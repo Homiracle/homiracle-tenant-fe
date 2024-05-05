@@ -11,6 +11,7 @@ export type RootStackParamList = {
   [RootScreens.PROFILE]: undefined;
   [RootScreens.NOTIFICATION]: undefined;
   [RootScreens.ROOM]: undefined;
+  [RootScreens.ROOM_DETAIL]: { attendance_id: number; room_id: string, name: string, screenName?: string};
   AuthStack: undefined;
   HomeStack: undefined;
   RoomStack: undefined;

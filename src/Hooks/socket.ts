@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAppSelector } from '../Store/hook'; // Assuming correct path
 import { selectAuthToken } from '../Store/reducers';
 import { io, Socket } from 'socket.io-client';
+import { Config } from '../Config';
 
 // type connectionErrorType = {
 //   message: string;
@@ -10,24 +11,26 @@ import { io, Socket } from 'socket.io-client';
 
 export const useSocket = () => {
   const accessToken = useAppSelector(selectAuthToken);
-  const IotServer = 'http://10.0.157.143:3001';
+  const IotServer = Config.IOT_API_URL;
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
   const [message, setMessage] = useState(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     const createSocket = async () => {
       try {
         const socket = io(`${IotServer}?token=${accessToken}`);
+        socketRef.current = socket;
 
         socket.on('connect', () => {
           console.log('Connecting to the socket server');
-          setIsConnected(true);
           setConnectionError(null);
         });
 
         socket.on('connected', data => {
+          setIsConnected(true);
           console.log('Is connected:', data);
         });
 
@@ -60,8 +63,8 @@ export const useSocket = () => {
 
     // Cleanup function: Close the socket when the component unmounts
     return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
       }
     };
   }, [accessToken]); // Dependency array includes accessToken

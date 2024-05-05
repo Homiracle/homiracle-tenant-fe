@@ -1,4 +1,5 @@
 import { API } from '../Services/base';
+import { IoTAPI } from '../Services/devices/base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
@@ -22,6 +23,7 @@ import {
 
 const reducers = combineReducers({
   api: API.reducer,
+  iotApi: IoTAPI.reducer,
   theme: themeReducers,
   home: homeReducers,
   user: userReducers,
@@ -44,7 +46,9 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(API.middleware);
+    })
+      .concat(API.middleware)
+      .concat(IoTAPI.middleware);
 
     // if (__DEV__ && !process.env.JEST_WORKER_ID) {
     //   const createDebugger = require("redux-flipper").default;

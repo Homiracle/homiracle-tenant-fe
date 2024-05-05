@@ -5,6 +5,7 @@ import { History } from './History';
 
 import { Header, ItfInvoiceItem, TabView } from '../../Components';
 import { TabButton } from '../../Components/TabView/TabButton';
+import { heightPercentageToDP } from 'react-native-responsive-screen';
 
 export const Finance = () => {
   const tabs = ['Hoá đơn', 'Lịch sử giao dịch'];
@@ -59,7 +60,7 @@ export const Finance = () => {
     <View style={{ flex: 1 }}>
       <Header
         title='Tài chính'
-        height={10}
+        height={heightPercentageToDP(2)}
         mode='center-aligned'
         onBack={() => {
           console.log('back');
