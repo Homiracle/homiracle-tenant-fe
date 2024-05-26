@@ -10,4 +10,5 @@ export * from './TenantItem';
 export * from './Room';
 export * from './SearchBar';
 export * from './Invoice';
+export * from './Payment';
 export * from './Home';

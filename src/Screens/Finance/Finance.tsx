@@ -3,50 +3,21 @@ import React from 'react';
 import { Invoice } from './Invoice';
 import { History } from './History';
 
-import { Header, ItfInvoiceItem, TabView } from '../../Components';
+import { Header, TabView } from '../../Components';
 import { TabButton } from '../../Components/TabView/TabButton';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
+import { useGetInvoicesQuery } from '../../Services/invoices';
+import { ItfInvoiceItem } from '../../Services/invoices/interface';
+import { useNavigation } from '@react-navigation/native';
 
 export const Finance = () => {
   const tabs = ['Hoá đơn', 'Lịch sử giao dịch'];
-  const invoiceList: Array<ItfInvoiceItem> = [
-    {
-      id: '1',
-      name: 'Tiền nhà tháng 09/2023',
-      price: 1500000,
-      paidStatus: true,
-      detail: [
-        { name: 'Tiền điện', amount: '100kWh', price: 300000 },
-        { name: 'Tiền nước', amount: '20m3', price: 1000000 },
-        { name: 'Tiền trọ', amount: '', price: 200000 },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Tiền nhà tháng 10/2023',
-      price: 1300000,
-      paidStatus: false,
-      detail: [
-        { name: 'Tiền điện', amount: '100kWh', price: 300000 },
-        { name: 'Tiền nước', amount: '10m3', price: 500000 },
-        { name: 'Tiền trọ', amount: '', price: 500000 },
-      ],
-    },
-    {
-      id: '3',
-      name: 'Tiền nhà tháng 11/2023',
-      price: 1600000,
-      paidStatus: false,
-      detail: [
-        { name: 'Tiền điện', amount: '100kWh', price: 300000 },
-        { name: 'Tiền nước', amount: '20m3', price: 1000000 },
-        { name: 'Tiền trọ', amount: '', price: 300000 },
-      ],
-    },
-  ];
+  const { data } = useGetInvoicesQuery();
+  const navigator = useNavigation();
 
   // state
   const [activeTab, setActiveTab] = React.useState<number>(0);
+  const [invoiceList, setInvoiceList] = React.useState<ItfInvoiceItem[]>([]);
 
   // function
   const focusInvoices = () => {
@@ -56,15 +27,17 @@ export const Finance = () => {
     setActiveTab(1);
   };
 
+  React.useEffect(() => {
+    data && setInvoiceList(data);
+  }, [data]);
+
   return (
     <View style={{ flex: 1 }}>
       <Header
         title='Tài chính'
         height={heightPercentageToDP(2)}
         mode='center-aligned'
-        onBack={() => {
-          console.log('back');
-        }}
+        onBack={() => navigator.goBack()}
       />
       <TabView>
         <TabButton

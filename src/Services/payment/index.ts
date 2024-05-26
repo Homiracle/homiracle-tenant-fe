@@ -1,26 +1,25 @@
 import { API } from '../base';
-import { ItfDeeplink, ItfQrResult } from './interface';
+import { DeepLinksItf, QrItf } from './interface';
 
-const paymentApi = API.injectEndpoints({
+const PaymentApi = API.injectEndpoints({
   endpoints: build => ({
-    /* get deeplinks of supported banks */
-    getDeepLinks: build.query<ItfDeeplink, { os: string }>({
-      query: param => {
-        return `/payment/deeplinks?os=${param.os}`
-      },
-      providesTags: ['Payment'],
+    /** Get bank deeplinks which supported by VietQR */
+    getDeeplink: build.query<DeepLinksItf, void>({
+      query: () => `payment/deeplinks?os=android`,
     }),
-    /* generate VietQR */
-    getQr: build.mutation<ItfQrResult, { amount: number }>({
-      invalidatesTags: ['Payment'],
-      query: param => ({
-        method: 'POST',
-        url: '/payment/vietqr',
-        body: { amount: param.amount },
-      })
-    }),
+
+    /** Generate QR Code by VietQR */
+    getQRCode: build.query<QrItf, { amount: number }>({
+      query: (param) => {
+        return {
+          method: 'POST',
+          url: 'payment/vietqr',
+          body: { amount: param.amount }
+        }
+      }
+    })
   }),
   overrideExisting: true,
 });
 
-export const { useGetDeepLinksQuery, useGetQrMutation } = paymentApi;
+export const { useGetDeeplinkQuery, useGetQRCodeQuery } = PaymentApi;

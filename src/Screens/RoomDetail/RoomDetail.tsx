@@ -80,7 +80,7 @@ export const RoomDetail = ({
         onFocus={focusPredict}
       />
       </TabView>
-      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <DeviceComponent id={attendance_id} />}
+      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <DeviceComponent id={attendance_id} navigation={navigation}/>}
       {activeTab === 1 && (
         <RoomInfo
           tabName={tabName}

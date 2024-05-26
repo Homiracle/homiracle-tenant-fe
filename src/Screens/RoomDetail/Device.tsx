@@ -1,5 +1,5 @@
 import { DeviceType } from '../../Constants/DeviceType';
-import { CardCustom } from '../../Components';
+import { CardCustom, CardCustomForControlledDevice } from '../../Components';
 import { useAppTheme } from '../../Theme';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -15,12 +15,21 @@ import {
 } from '../../Services';
 import type { Device } from '../../Services/devices/type';
 import { useSocket } from '../../Hooks';
+import { useAppDispatch } from '../../Store/hook';
+import { setDevice, updateDevice } from '../../Store/reducers';
+import { AirConditionerMode } from '../DeviceDetail/AirConditionerScreen';
 
 interface DeviceExt extends Device {
   value?: any;
 }
 
-export const DeviceComponent = ({ id }: { id: number }) => {
+export const DeviceComponent = ({
+  id,
+  navigation,
+}: {
+  id: number;
+  navigation: any;
+}) => {
   // constants
   const time = 10;
 
@@ -28,6 +37,7 @@ export const DeviceComponent = ({ id }: { id: number }) => {
   const theme = useAppTheme();
   const [deviceArray, setDeviceArray] = useState<DeviceExt[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const dispatch = useAppDispatch();
 
   /**
    * Fetch device data
@@ -65,14 +75,6 @@ export const DeviceComponent = ({ id }: { id: number }) => {
             device.value && (sumE += device.value.value);
             break;
 
-          case DeviceType.HUMIDTY_SENSOR:
-            device.value && (sumH += device.value.value);
-            break;
-
-          case DeviceType.TEMPERATURE_SENSOR:
-            device.value && (sumT += device.value.value);
-            break;
-
           case DeviceType.WATER_METER:
             device.value && (sumW += device.value.value);
             break;
@@ -92,44 +94,6 @@ export const DeviceComponent = ({ id }: { id: number }) => {
     return [0, 0, 0, 0];
   };
 
-  // const classifyDevices = (deviceList: DeviceExt[]) => {
-  //   for (const device of deviceList) {
-  //     switch (device.type) {
-  //       case DeviceType.ELECTRIC_METER:
-  //         setElectricDevices(prev => [...prev, device]);
-  //         break;
-
-  //       case DeviceType.HUMIDTY_SENSOR:
-  //         setHumidityDevices(prev => [...prev, device]);
-  //         break;
-
-  //       case DeviceType.TEMPERATURE_SENSOR:
-  //         setTemperatureDevices(prev => [...prev, device]);
-  //         break;
-
-  //       case DeviceType.WATER_METER:
-  //         setWaterDevices(prev => [...prev, device]);
-  //         break;
-
-  //       case DeviceType.LIGHT:
-  //         setLightDevices(prev => [...prev, device]);
-  //         break;
-
-  //       case DeviceType.FAN:
-  //         setFanDevices(prev => [...prev, device]);
-  //         break;
-
-  //       case DeviceType.CAMERA:
-  //         setCameraDevices(prev => [...prev, device]);
-  //         break;
-
-  //       default:
-  //         console.log('Hê hê hê sai loại cmnr :))');
-  //         break;
-  //     }
-  //   }
-  // };
-
   /**
    * listen to device data change
    */
@@ -141,17 +105,43 @@ export const DeviceComponent = ({ id }: { id: number }) => {
 
       const promises = devices.map(device => {
         return getDataIotDevices(device.device_id).then(res => {
+          let value = res.data?.value;
+          switch (device.type) {
+            case DeviceType.LIGHT:
+              value = value || { status: false };
+              break;
+            case DeviceType.FAN:
+              value = value || { status: false };
+              break;
+            case DeviceType.AIR_CONDITIONER:
+              value = value || {
+                status: true,
+                value: 25,
+                mode: AirConditionerMode.COOL,
+              };
+              break;
+            default:
+              break;
+          }
           setDeviceArray(prev => {
             return prev.map(d => {
               if (d.device_id === device.device_id) {
                 return {
                   ...d,
-                  value: res.data?.value,
+                  value: res.data?.value || value,
                 };
               }
               return d;
             });
-          });
+          });          
+          dispatch(
+            setDevice({
+              id: device.device_id,
+              name: device.name,
+              type: device.type,
+              value: value,
+            }),
+          );
         });
       });
 
@@ -181,6 +171,7 @@ export const DeviceComponent = ({ id }: { id: number }) => {
           return d;
         });
       });
+      dispatch(updateDevice({ id: deviceId, value: JSON.parse(value), field: 'value' }));
     }
   }, [message]);
 
@@ -188,25 +179,28 @@ export const DeviceComponent = ({ id }: { id: number }) => {
    * handle on switch
    */
   const handleOnSwitch = (value: boolean, deviceId: string) => {
+    console.log("🚀 ~ handleOnSwitch ~ value:", value)
     if (!socketInstance || !isConnected) {
       console.log('Socket is not connected');
       return;
     }
-    console.log('🚀 ~ handleOnSwitch ~ value:', value);
     setDeviceArray(prev => {
       return prev.map(d => {
         if (d.device_id === deviceId) {
           return {
             ...d,
-            value: { value: value },
+            value: { ...d.value, status: value },
           };
         }
         return d;
       });
     });
+
+    dispatch(updateDevice({ id: deviceId, value: { status: value }, field: 'status' }));
+
     socketInstance.emit('control', {
       deviceId: deviceId,
-      value: { value: value },
+      value: { status: value },
     });
   };
 
@@ -217,16 +211,6 @@ export const DeviceComponent = ({ id }: { id: number }) => {
         paddingBottom: hp(2),
       }}
     >
-      {/* <Text
-        style={{
-          color: theme.colors.primary,
-          fontWeight: 'bold',
-          marginBottom: 12,
-        }}
-        variant='titleMedium'
-      >
-        Chung
-      </Text> */}
       <View
         style={{
           flexDirection: 'column',
@@ -236,11 +220,13 @@ export const DeviceComponent = ({ id }: { id: number }) => {
         }}
       >
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: wp(2) }}>
-          {deviceArray.map(device => {
+          {deviceArray.map((device, index) => {
             switch (device.type) {
               case DeviceType.ELECTRIC_METER:
                 return (
                   <CardCustom
+                    key={index}
+                    deviceId={device.device_id}
                     title='Điện'
                     value={calculate(deviceArray)[0]}
                     unit='kWh'
@@ -251,30 +237,11 @@ export const DeviceComponent = ({ id }: { id: number }) => {
               case DeviceType.WATER_METER:
                 return (
                   <CardCustom
+                    deviceId={device.device_id}
                     title='Nước'
                     value={calculate(deviceArray)[3]}
                     unit='m3'
                     icon='water-outline'
-                  />
-                );
-
-              case DeviceType.TEMPERATURE_SENSOR:
-                return (
-                  <CardCustom
-                    title='Nhiệt độ'
-                    value={calculate(deviceArray)[2]}
-                    unit='°C'
-                    icon='thermometer'
-                  />
-                );
-
-              case DeviceType.HUMIDTY_SENSOR:
-                return (
-                  <CardCustom
-                    title='Độ ẩm'
-                    value={calculate(deviceArray)[1]}
-                    unit='%'
-                    icon='water-percent'
                   />
                 );
 
@@ -284,71 +251,71 @@ export const DeviceComponent = ({ id }: { id: number }) => {
           })}
         </View>
       </View>
-      {/* <Text
-        style={{
-          color: theme.colors.primary,
-          fontWeight: 'bold',
-          marginVertical: 12,
-        }}
-        variant='titleMedium'
-      >
-        Thiết bị
-      </Text> */}
       <View
         style={{
-          paddingBottom: 20,
+          flexDirection: 'column',
+          gap: hp(1),
+          paddingBottom: 2,
           paddingHorizontal: 2,
-          gap: wp(2),
-          marginVertical: wp(2),
         }}
       >
-        {deviceArray.map(device => {
-          switch (device.type) {
-            case DeviceType.LIGHT:
-              return (
-                <Card
-                  key={device.device_id}
-                  style={{
-                    backgroundColor: theme.colors.onPrimary,
-                  }}
-                >
-                  <Card.Content
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
-                    >
-                      <Icon
-                        name='lightbulb-outline'
-                        size={40}
-                        color={theme.colors.primary}
-                      ></Icon>
-                      <Text>{device.name}</Text>
-                    </View>
-                    <Switch
-                      value={device.value?.value}
-                      // onChange={() => handleOnSwitch(device.device_id)}
-                      onValueChange={value =>
-                        handleOnSwitch(value, device.device_id)
-                      }
-                    />
-                  </Card.Content>
-                </Card>
-              );
-
-            default:
-              return <></>;
-          }
-        })}
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: wp(2),
+            marginTop: hp(2),
+          }}
+        >
+          {deviceArray.map((device, index) => {
+            switch (device.type) {
+              case DeviceType.LIGHT:
+                return (
+                  <CardCustomForControlledDevice
+                    key={index}
+                    deviceId={device.device_id}
+                    deviceType={device.type}
+                    title={device.name}
+                    value={device.value?.status || false}
+                    onValueChange={(value: boolean) =>
+                      handleOnSwitch(value, device.device_id)
+                    }
+                    navigation={navigation}
+                  />
+                );
+              case DeviceType.FAN:
+                return (
+                  <CardCustomForControlledDevice
+                    key={index}
+                    deviceId={device.device_id}
+                    deviceType={device.type}
+                    title={device.name}
+                    value={device.value?.status || false}
+                    onValueChange={(value: boolean) =>
+                      handleOnSwitch(value, device.device_id)
+                    }
+                    navigation={navigation}
+                  />
+                );
+              case DeviceType.AIR_CONDITIONER:
+                return (
+                  <CardCustomForControlledDevice
+                    key={index}
+                    deviceId={device.device_id}
+                    deviceType={device.type}
+                    title={device.name}
+                    value={device.value?.status || false}
+                    onValueChange={(value: boolean) =>
+                      handleOnSwitch(value, device.device_id)
+                    }
+                    navigation={navigation}
+                  />
+                );
+              default:
+                return <></>;
+            }
+          })}
+        </View>
       </View>
     </ScrollView>
   );

@@ -1,15 +1,17 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, Button, DataTable } from 'react-native-paper';
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
 
 import theme from '../../Theme';
-import { ItfInvoiceItem, ItfInvoiceMoney } from '.';
 import { RootScreens } from '../../Constants/RootScreen';
+import { ItfInvoiceItem } from '../../Services/invoices/interface';
+import {
+  PaymentName,
+  InvoiceStatus,
+  InvoiceStatusText,
+} from '../../Constants/Invoice';
 
 const toVietnamCurrency = (input: number | string) => {
   return input.toLocaleString('it-IT', {
@@ -22,6 +24,8 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
   const navigation = useNavigation();
 
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const navigator = useNavigation();
+
   const styles = StyleSheet.create({
     cardTitle: {
       display: 'flex',
@@ -38,8 +42,8 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
   });
 
   const onPayment = () => {
-    navigation.navigate(RootScreens.PAYMENT as never);
-    // navigation.navigate(RootScreens.PAYMENT, { name: 'Payment' });
+    // @ts-ignore
+    navigator.navigate(RootScreens.INVOICE, { invoice_id: item.invoice_id });
   };
 
   return (
@@ -47,16 +51,23 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
       <Card.Content>
         <View style={styles.cardTitle}>
           <Text variant='titleMedium'>{item.name}</Text>
-          {item.paidStatus ? (
+          {item.status === InvoiceStatus.PAID ? (
             <Text style={{ color: theme.colors.primary }}>Đã thanh toán</Text>
           ) : (
-            <Text style={{ color: theme.colors.error }}>Chưa thanh toán</Text>
+            <Text style={{ color: theme.colors.error }}>
+              {
+                // @ts-ignore
+                InvoiceStatusText[String(item.status).toUpperCase()]
+              }
+            </Text>
           )}
         </View>
-        <Text>{toVietnamCurrency(item.price)}</Text>
+        <Text>{toVietnamCurrency(item.total)}</Text>
       </Card.Content>
       <Card.Actions>
-        {!item.paidStatus && <Button onPress={onPayment}>Thanh toán</Button>}
+        {item.status !== InvoiceStatus.PAID && (
+          <Button onPress={onPayment}>Thanh toán</Button>
+        )}
       </Card.Actions>
 
       {!isExpanded && (
@@ -76,15 +87,22 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
               <DataTable.Title numeric>Tiêu thụ</DataTable.Title>
               <DataTable.Title numeric>Số tiền</DataTable.Title>
             </DataTable.Header>
-            {item.detail.map((_: ItfInvoiceMoney) => (
-              <DataTable.Row style={{ borderColor: 'transparent' }}>
-                <DataTable.Cell>{_.name}</DataTable.Cell>
-                <DataTable.Cell numeric>{_.amount}</DataTable.Cell>
-                <DataTable.Cell numeric>
-                  {toVietnamCurrency(_.price)}
-                </DataTable.Cell>
-              </DataTable.Row>
-            ))}
+            {item.costs
+              .filter(_ => _.cost > 0)
+              .map(_ => (
+                <DataTable.Row style={{ borderColor: 'transparent' }}>
+                  <DataTable.Cell>
+                    {
+                      // @ts-ignore
+                      PaymentName[_.name]
+                    }
+                  </DataTable.Cell>
+                  <DataTable.Cell numeric> </DataTable.Cell>
+                  <DataTable.Cell numeric>
+                    {toVietnamCurrency(_.cost)}
+                  </DataTable.Cell>
+                </DataTable.Row>
+              ))}
           </DataTable>
           <Button
             icon={'chevron-double-up'}
