@@ -7,7 +7,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AirConIcon from '../../static/icon/AirConIcon';
 import LedIcon from '../../static/icon/LedIcon';
 import { DeviceType } from '../../Constants/DeviceType';
-import { useNavigation } from '@react-navigation/native';
 import { RootScreens } from '../../Constants/RootScreen';
 
 export type CardCustomProps = {
@@ -52,10 +51,7 @@ export const CardCustom = ({
             <Text style={[styles.whiteText]} variant='displaySmall'>
               {value}
             </Text>
-            <Text style={[styles.whiteText]}>
-              {'  '}
-              {unit}
-            </Text>
+            <Text style={[styles.whiteText]}>{unit}</Text>
           </Text>
         </View>
         <Icon
@@ -82,8 +78,15 @@ export const CardCustomForControlledDevice = ({
   title,
   value,
   onValueChange,
-  navigation
-}: { deviceId: string, deviceType: DeviceType, title: string, value: boolean, onValueChange: (value: boolean) => void, navigation: any }) => {
+  navigation,
+}: {
+  deviceId: string;
+  deviceType: DeviceType;
+  title: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+  navigation?: any;
+}) => {
   const theme = useAppTheme();
   const styles = StyleSheet.create({
     title: {
@@ -104,7 +107,14 @@ export const CardCustomForControlledDevice = ({
         backgroundColor: 'white',
       }}
       key={deviceId}
-      onPress={() => navigation.navigate(RootScreens.DEVICE_DETAIL, { device_id: deviceId, device_type: deviceType, device_name: title})}
+      onPress={() => {
+        if (navigation && deviceType === DeviceType.AIR_CONDITIONER)
+          navigation.navigate(RootScreens.DEVICE_DETAIL, {
+            device_id: deviceId,
+            device_type: deviceType,
+            device_name: title,
+          });
+      }}
     >
       <Card.Content>
         <View
@@ -116,22 +126,25 @@ export const CardCustomForControlledDevice = ({
         >
           {deviceType === DeviceType.AIR_CONDITIONER && <AirConIcon />}
           {deviceType === DeviceType.LIGHT && <LedIcon />}
-          {deviceType === DeviceType.FAN && 
-          <Icon name='fan'
-            size={40}
-            style={{
-              backgroundColor: 'rgba(220, 220, 220, 0.3)',
-              borderRadius: 50,
-              height: 50,
-              width: 50,
-              textAlign: 'center',
-              textAlignVertical: 'center',
-              color: theme.colors.primary,
-          }}/>}
+          {deviceType === DeviceType.FAN && (
+            <Icon
+              name='fan'
+              size={40}
+              style={{
+                backgroundColor: 'rgba(220, 220, 220, 0.3)',
+                borderRadius: 50,
+                height: 50,
+                width: 50,
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                color: theme.colors.primary,
+              }}
+            />
+          )}
           <Switch value={value} onValueChange={onValueChange} />
         </View>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subTitle}>Bật lúc 6:30</Text> 
+        {/* <Text style={styles.subTitle}>Bật lúc 6:30</Text>  */}
       </Card.Content>
     </Card>
   );

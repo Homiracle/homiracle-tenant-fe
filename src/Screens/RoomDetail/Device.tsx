@@ -15,12 +15,21 @@ import {
 } from '../../Services';
 import type { Device } from '../../Services/devices/type';
 import { useSocket } from '../../Hooks';
+import { useAppDispatch } from '../../Store/hook';
+import { setDevice, updateDevice } from '../../Store/reducers';
+import { AirConditionerMode } from '../DeviceDetail/AirConditionerScreen';
 
 interface DeviceExt extends Device {
   value?: any;
 }
 
-export const DeviceComponent = ({ id, navigation }: { id: number, navigation: any }) => {
+export const DeviceComponent = ({
+  id,
+  navigation,
+}: {
+  id: number;
+  navigation: any;
+}) => {
   // constants
   const time = 10;
 
@@ -28,6 +37,7 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
   const theme = useAppTheme();
   const [deviceArray, setDeviceArray] = useState<DeviceExt[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const dispatch = useAppDispatch();
 
   /**
    * Fetch device data
@@ -95,17 +105,43 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
 
       const promises = devices.map(device => {
         return getDataIotDevices(device.device_id).then(res => {
+          let value = res.data?.value;
+          switch (device.type) {
+            case DeviceType.LIGHT:
+              value = value || { status: false };
+              break;
+            case DeviceType.FAN:
+              value = value || { status: false };
+              break;
+            case DeviceType.AIR_CONDITIONER:
+              value = value || {
+                status: true,
+                value: 25,
+                mode: AirConditionerMode.COOL,
+              };
+              break;
+            default:
+              break;
+          }
           setDeviceArray(prev => {
             return prev.map(d => {
               if (d.device_id === device.device_id) {
                 return {
                   ...d,
-                  value: res.data?.value,
+                  value: res.data?.value || value,
                 };
               }
               return d;
             });
-          });
+          });          
+          dispatch(
+            setDevice({
+              id: device.device_id,
+              name: device.name,
+              type: device.type,
+              value: value,
+            }),
+          );
         });
       });
 
@@ -135,6 +171,7 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
           return d;
         });
       });
+      dispatch(updateDevice({ id: deviceId, value: JSON.parse(value), field: 'value' }));
     }
   }, [message]);
 
@@ -142,25 +179,28 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
    * handle on switch
    */
   const handleOnSwitch = (value: boolean, deviceId: string) => {
+    console.log("🚀 ~ handleOnSwitch ~ value:", value)
     if (!socketInstance || !isConnected) {
       console.log('Socket is not connected');
       return;
     }
-    // console.log('🚀 ~ handleOnSwitch ~ value:', value);
     setDeviceArray(prev => {
       return prev.map(d => {
         if (d.device_id === deviceId) {
           return {
             ...d,
-            value: { value: value },
+            value: { ...d.value, status: value },
           };
         }
         return d;
       });
     });
+
+    dispatch(updateDevice({ id: deviceId, value: { status: value }, field: 'status' }));
+
     socketInstance.emit('control', {
       deviceId: deviceId,
-      value: { value: value },
+      value: { status: value },
     });
   };
 
@@ -171,16 +211,6 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
         paddingBottom: hp(2),
       }}
     >
-      {/* <Text
-        style={{
-          color: theme.colors.primary,
-          fontWeight: 'bold',
-          marginBottom: 12,
-        }}
-        variant='titleMedium'
-      >
-        Chung
-      </Text> */}
       <View
         style={{
           flexDirection: 'column',
@@ -198,8 +228,7 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
                     key={index}
                     deviceId={device.device_id}
                     title='Điện'
-                    // value={calculate(deviceArray)[0]}
-                    value={100}
+                    value={calculate(deviceArray)[0]}
                     unit='kWh'
                     icon='lightning-bolt-outline'
                   />
@@ -210,8 +239,7 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
                   <CardCustom
                     deviceId={device.device_id}
                     title='Nước'
-                    // value={calculate(deviceArray)[3]}
-                    value={100}
+                    value={calculate(deviceArray)[3]}
                     unit='m3'
                     icon='water-outline'
                   />
@@ -231,7 +259,14 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
           paddingHorizontal: 2,
         }}
       >
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: wp(2), marginTop: hp(2) }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: wp(2),
+            marginTop: hp(2),
+          }}
+        >
           {deviceArray.map((device, index) => {
             switch (device.type) {
               case DeviceType.LIGHT:
@@ -241,8 +276,10 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
                     deviceId={device.device_id}
                     deviceType={device.type}
                     title={device.name}
-                    value={true}
-                    onValueChange={(value: boolean) => handleOnSwitch(value, device.device_id)}
+                    value={device.value?.status || false}
+                    onValueChange={(value: boolean) =>
+                      handleOnSwitch(value, device.device_id)
+                    }
                     navigation={navigation}
                   />
                 );
@@ -253,8 +290,10 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
                     deviceId={device.device_id}
                     deviceType={device.type}
                     title={device.name}
-                    value={true}
-                    onValueChange={(value: boolean) => handleOnSwitch(value, device.device_id)}
+                    value={device.value?.status || false}
+                    onValueChange={(value: boolean) =>
+                      handleOnSwitch(value, device.device_id)
+                    }
                     navigation={navigation}
                   />
                 );
@@ -265,8 +304,10 @@ export const DeviceComponent = ({ id, navigation }: { id: number, navigation: an
                     deviceId={device.device_id}
                     deviceType={device.type}
                     title={device.name}
-                    value={true}
-                    onValueChange={(value: boolean) => handleOnSwitch(value, device.device_id)}
+                    value={device.value?.status || false}
+                    onValueChange={(value: boolean) =>
+                      handleOnSwitch(value, device.device_id)
+                    }
                     navigation={navigation}
                   />
                 );
