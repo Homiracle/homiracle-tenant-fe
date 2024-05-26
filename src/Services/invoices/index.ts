@@ -18,6 +18,8 @@ const invoiceApi = API.injectEndpoints({
               // @ts-ignore
               return [...result, { name: [key], cost: Number(_.cost[key]) }];
             }, []),
+            start_paid_day: String(_.start_paid_day),
+            end_paid_day: String(_.end_paid_day),
           } as unknown as ItfInvoiceItem))
         },
       }),
@@ -35,6 +37,8 @@ const invoiceApi = API.injectEndpoints({
               // @ts-ignore
               return [...result, { name: [key], cost: Number(resp.cost[key]) }];
             }, []),
+            start_paid_day: String(resp.start_paid_day),
+            end_paid_day: String(resp.end_paid_day),
           } as unknown as ItfInvoiceItem;
         },
       }),

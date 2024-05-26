@@ -2,8 +2,10 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text, Button, DataTable } from 'react-native-paper';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import { useNavigation } from '@react-navigation/native';
 
 import theme from '../../Theme';
+import { RootScreens } from '../../Constants/RootScreen';
 import { ItfInvoiceItem } from '../../Services/invoices/interface';
 import {
   PaymentName,
@@ -20,6 +22,8 @@ const toVietnamCurrency = (input: number | string) => {
 
 export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const navigator = useNavigation();
+
   const styles = StyleSheet.create({
     cardTitle: {
       display: 'flex',
@@ -34,6 +38,11 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
       borderBottomWidth: 1,
     },
   });
+
+  const onPayment = () => {
+    // @ts-ignore
+    navigator.navigate(RootScreens.INVOICE, { invoice_id: item.invoice_id });
+  };
 
   return (
     <Card style={{ width: wp(90), margin: wp(1) }}>
@@ -55,7 +64,7 @@ export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
       </Card.Content>
       <Card.Actions>
         {item.status !== InvoiceStatus.PAID && (
-          <Button onPress={() => console.log('hihi')}>Thanh toán</Button>
+          <Button onPress={onPayment}>Thanh toán</Button>
         )}
       </Card.Actions>
 

@@ -3,8 +3,8 @@ import { InvoiceStatus } from "../../../Constants/Invoice"
 export interface ItfInvoice {
   invoice_id: number,
   status: InvoiceStatus,
-  start_paid_day: number,
-  end_paid_day: number,
+  start_paid_day: string | number,
+  end_paid_day: string | number,
   type: any,
   total: number,
   cost: {
@@ -28,8 +28,8 @@ export interface ItfInvoiceItem {
   invoice_id: number,
   status: InvoiceStatus,
   name: string,
-  start_paid_day?: 20,
-  end_paid_day?: 25,
+  start_paid_day: string,
+  end_paid_day: string,
   landlord?: { user_id: string, user_name: string },
   tenant?: { user_id: string, user_name: string },
   total: number,

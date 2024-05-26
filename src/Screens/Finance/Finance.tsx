@@ -8,10 +8,12 @@ import { TabButton } from '../../Components/TabView/TabButton';
 import { heightPercentageToDP } from 'react-native-responsive-screen';
 import { useGetInvoicesQuery } from '../../Services/invoices';
 import { ItfInvoiceItem } from '../../Services/invoices/interface';
+import { useNavigation } from '@react-navigation/native';
 
 export const Finance = () => {
   const tabs = ['Hoá đơn', 'Lịch sử giao dịch'];
   const { data } = useGetInvoicesQuery();
+  const navigator = useNavigation();
 
   // state
   const [activeTab, setActiveTab] = React.useState<number>(0);
@@ -35,9 +37,7 @@ export const Finance = () => {
         title='Tài chính'
         height={heightPercentageToDP(2)}
         mode='center-aligned'
-        onBack={() => {
-          console.log('back');
-        }}
+        onBack={() => navigator.goBack()}
       />
       <TabView>
         <TabButton
