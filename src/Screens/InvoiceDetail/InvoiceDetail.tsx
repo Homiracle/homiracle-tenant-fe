@@ -113,7 +113,7 @@ export const InvoiceDetail = (props: InvoiceDetailNavigatorProps) => {
               </DataTable>
             </Card.Content>
           </Card>
-          <Payment />
+          <Payment total={invoice.total} />
         </>
       )}
     </View>

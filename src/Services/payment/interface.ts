@@ -9,3 +9,12 @@ export interface DeepLinksItf {
     monthlyInstall: number
   }>
 }
+
+export interface QrItf {
+  code: string,
+  desc: string,
+  data: {
+    qrCode: string,
+    qrDataURL: string,
+  }
+}

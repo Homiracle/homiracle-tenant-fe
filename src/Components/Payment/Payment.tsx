@@ -17,19 +17,20 @@ import { Dropdown } from 'react-native-searchable-dropdown-kj';
 import { Image } from 'native-base';
 import { Linking } from 'react-native';
 
-import { useGetDeeplinkQuery } from '../../Services/payment';
+import { useGetDeeplinkQuery, useGetQRCodeQuery } from '../../Services/payment';
 import { DeepLinksItf } from '../../Services/payment/interface';
 
-export const Payment = () => {
+export const Payment = ({ total }: { total: number }) => {
   const methods = ['VietQR'];
   const { data: deeplinks } = useGetDeeplinkQuery();
+  const { data: vietQr } = useGetQRCodeQuery({ amount: total });
 
   const [method, setMethod] = React.useState('VietQR');
   const [visible, setVisible] = React.useState(false);
   const [value, setValue] = React.useState('');
   const [isFocus, setIsFocus] = React.useState(false);
   const [qrImg, setQrImg] = React.useState(
-    'https://i0.wp.com/chromebooklive.com/wp-content/uploads/2020/04/chrome-qr-code-url-generator.png?resize=100',
+    'https://api.vietqr.io/image/970423-10393455850-JYV5DPc.jpg?accountName=BAN%20QUAN%20LY%20HOMIRACLE&amount=10000',
   );
   const [bankDeeplink, setBankDeeplink] = React.useState<DeepLinksItf>();
 
@@ -43,16 +44,17 @@ export const Payment = () => {
       padding: hp(1),
     },
     modal: {
-      backgroundColor: 'wheat',
-      paddingHorizontal: wp(5),
+      backgroundColor: 'snow',
+      padding: wp(5),
       width: wp(88),
-      height: hp(48),
+      height: hp(64),
       margin: wp(6),
       borderRadius: 8,
     },
     qrImg: {
-      width: wp(50),
-      height: wp(50),
+      minWidth: 240,
+      minHeight: 300,
+      height: hp(40),
       alignSelf: 'center',
     },
     dropdown: {
@@ -93,14 +95,21 @@ export const Payment = () => {
 
   const onPayment = () => {
     if (method === 'VietQR') {
-      setVisible(true);
+      if (vietQr?.code === '00' && vietQr.data) {
+        setQrImg(vietQr.data.qrDataURL);
+        setVisible(true);
+      } else alert('Tạo mã QR thất bại...');
     }
   };
 
   const onRedirect = () => {
-    const url = value + `&am=${10000}&ba=10393455850@tpb`
-    console.log(url);
-    // value && Linking.openURL(value)
+    if (!value) {
+      alert('Hãy vui lòng chọn ứng dụng ngân hàng!');
+      return;
+    }
+
+    const url = value + `&am=${total}&ba=10393455850@tpb`;
+    Linking.openURL(url);
   };
 
   React.useEffect(() => {
@@ -130,6 +139,7 @@ export const Payment = () => {
           <Button onPress={onPayment}>Thanh toán</Button>
         </Card.Actions>
       </Card>
+
       <Portal>
         <Modal
           visible={visible}
@@ -176,7 +186,7 @@ export const Payment = () => {
             }}
           />
           <Text
-            style={{ textAlign: 'right', paddingTop: hp(2) }}
+            style={{ textAlign: 'right', paddingVertical: hp(2) }}
             onPress={onRedirect}
           >
             Mở bằng ứng dụng ngân hàng
