@@ -1,3 +1,4 @@
+import { DeviceType } from './DeviceType';
 import { RootScreens } from './RootScreen';
 
 export type RootStackParamList = {
@@ -11,7 +12,8 @@ export type RootStackParamList = {
   [RootScreens.PROFILE]: undefined;
   [RootScreens.NOTIFICATION]: undefined;
   [RootScreens.ROOM]: undefined;
-  [RootScreens.ROOM_DETAIL]: { attendance_id: number; room_id: string, name: string, screenName?: string };
+  [RootScreens.ROOM_DETAIL]: { attendance_id: number; room_id: string, name: string, screenName?: string};
+  [RootScreens.DEVICE_DETAIL]: { device_id: string; device_type: DeviceType; device_name: string };
   AuthStack: undefined;
   HomeStack: undefined;
   RoomStack: undefined;

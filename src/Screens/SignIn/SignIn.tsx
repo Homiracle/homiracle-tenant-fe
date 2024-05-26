@@ -11,8 +11,8 @@ import { saveToken, setUser } from '../../Store/reducers';
 
 export const SignIn = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('tenant1@gmail.com');
+  const [password, setPassword] = useState('Abc_123456789');
   const [showPassword, setShowPassword] = useState(false);
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
