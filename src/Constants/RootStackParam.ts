@@ -7,7 +7,7 @@ export type RootStackParamList = {
   [RootScreens.SIGNIN]: undefined;
   [RootScreens.SIGNUP]: undefined;
   [RootScreens.HOME]: undefined;
-  [RootScreens.INVOICE]: undefined;
+  [RootScreens.INVOICE]: { invoice_id: number };
   [RootScreens.FINANCE]: undefined;
   [RootScreens.PROFILE]: undefined;
   [RootScreens.NOTIFICATION]: undefined;

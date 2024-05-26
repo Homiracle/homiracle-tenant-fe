@@ -6,10 +6,14 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import { InvoiceItem, ItfInvoiceItem } from '../../Components';
+import { ItfInvoiceItem } from '../../Services/invoices/interface';
+import { InvoiceItem } from '../../Components';
+import { InvoiceStatus } from '../../Constants/Invoice';
 
 const History = ({ invoiceList }: { invoiceList: Array<ItfInvoiceItem> }) => {
-  const itemList = invoiceList.filter(item => item.paidStatus === true);
+  const itemList = invoiceList.filter(
+    item => item.status === InvoiceStatus.PAID,
+  );
 
   return (
     <View style={{ marginBottom: hp(15) }}>
