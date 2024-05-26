@@ -21,7 +21,6 @@ export const RoomDetail = ({
   const name = route.params.name;
   const attendance_id = route.params.attendance_id;
   const room_id = route.params.room_id;
-
   const tabs = ['Thông tin hợp đồng', 'Thiết bị', 'Thành viên', 'Thống kê'];
   const [activeTab, setActiveTab] = React.useState(
     tabName === AttendanceStatus.ACCEPTED ? 0 : 1,
@@ -90,7 +89,7 @@ export const RoomDetail = ({
           setIsAccept={setIsAccept}
         />
       )}
-      {activeTab === 3 && <Predict />}
+      {activeTab === 3 && <Predict roomId = {room_id}/>}
       <Portal>
         <CustomDialog
           visible={isOk}
