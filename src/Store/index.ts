@@ -19,6 +19,7 @@ import {
   authReducers,
   userReducers,
   roomingHouseReducers,
+  deviceReducers,
 } from './reducers';
 
 const reducers = combineReducers({
@@ -29,6 +30,7 @@ const reducers = combineReducers({
   user: userReducers,
   auth: authReducers,
   roomingHouse: roomingHouseReducers,
+  device: deviceReducers,
 });
 
 const persistConfig = {
