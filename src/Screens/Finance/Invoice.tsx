@@ -6,7 +6,8 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import { InvoiceItem, ItfInvoiceItem } from '../../Components';
+import { InvoiceItem } from '../../Components';
+import { ItfInvoiceItem } from '../../Services/invoices/interface';
 
 const Invoice = ({ invoiceList }: { invoiceList: Array<ItfInvoiceItem> }) => {
   return (
