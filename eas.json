@@ -19,6 +19,7 @@
     "preview-dev": {
       "distribution": "internal",
       "android": {
+        "image": "latest",
         "buildType": "apk"
       }
     },
