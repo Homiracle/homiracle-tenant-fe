@@ -6,3 +6,5 @@ export * from './floors';
 export * from './rooms';
 export * from './contract';
 export * from './devices';
+export * from './payment';
+export * from './consumption';

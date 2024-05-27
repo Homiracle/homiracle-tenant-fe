@@ -21,6 +21,8 @@ const toVietnamCurrency = (input: number | string) => {
 };
 
 export const InvoiceItem = ({ item }: { item: ItfInvoiceItem }) => {
+  const navigation = useNavigation();
+
   const [isExpanded, setIsExpanded] = React.useState(false);
   const navigator = useNavigation();
 

@@ -11,6 +11,7 @@ import { Portal } from 'react-native-paper';
 import { AttendanceStatus } from '../../Constants/AttendanceStatus';
 import { RoomInfo } from './RoomInfo';
 import { DeviceComponent } from './Device';
+import { Predict } from './Predict';
 
 export const RoomDetail = ({
   route,
@@ -20,8 +21,7 @@ export const RoomDetail = ({
   const name = route.params.name;
   const attendance_id = route.params.attendance_id;
   const room_id = route.params.room_id;
-
-  const tabs = ['Thông tin hợp đồng', 'Thiết bị', 'Thành viên'];
+  const tabs = ['Thông tin hợp đồng', 'Thiết bị', 'Thành viên', 'Thống kê'];
   const [activeTab, setActiveTab] = React.useState(
     tabName === AttendanceStatus.ACCEPTED ? 0 : 1,
   );
@@ -39,7 +39,10 @@ export const RoomDetail = ({
   const focusTenant = () => {
     setActiveTab(2);
   };
-
+  const focusPredict = () => {
+    setActiveTab(3);
+  };
+  
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -70,6 +73,12 @@ export const RoomDetail = ({
           displayNumber={false}
           onFocus={focusTenant}
         />
+        <TabButton
+        isClicked={activeTab === 3}
+        name={tabs[3]}
+        displayNumber={false}
+        onFocus={focusPredict}
+      />
       </TabView>
       {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <DeviceComponent id={attendance_id} navigation={navigation}/>}
       {activeTab === 1 && (
@@ -80,7 +89,7 @@ export const RoomDetail = ({
           setIsAccept={setIsAccept}
         />
       )}
-
+      {activeTab === 3 && <Predict roomId = {room_id}/>}
       <Portal>
         <CustomDialog
           visible={isOk}
