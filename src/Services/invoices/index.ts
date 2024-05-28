@@ -22,6 +22,7 @@ const invoiceApi = API.injectEndpoints({
             end_paid_day: String(_.end_paid_day),
           } as unknown as ItfInvoiceItem))
         },
+        providesTags: ['Invoice'],
       }),
 
       /** get specific invoice */
@@ -41,6 +42,7 @@ const invoiceApi = API.injectEndpoints({
             end_paid_day: String(resp.end_paid_day),
           } as unknown as ItfInvoiceItem;
         },
+        providesTags: ['Invoice'],
       }),
 
       /** set specific invoice to PAID status */
@@ -49,6 +51,7 @@ const invoiceApi = API.injectEndpoints({
           url: `/invoices/${param.id}/confirm_paid`,
           method: 'PATCH'
         }),
+        invalidatesTags: ['Invoice'],
       },
       ),
     };

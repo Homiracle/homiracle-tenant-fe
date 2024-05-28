@@ -12,7 +12,7 @@ import {
 } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext, AuthContextProps } from '../../Hooks/AuthContext';
-import { removeUser, signout } from '../../Store/reducers';
+import { removeUser, selectUser, signout } from '../../Store/reducers';
 
 export const Profile = () => {
   const theme = useAppTheme();
@@ -64,7 +64,7 @@ export const Profile = () => {
     },
   });
 
-  const user = useAppSelector(rootState => rootState.user.user);
+  const user = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
 
   const authContext = useContext<AuthContextProps>(
