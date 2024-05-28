@@ -4,3 +4,4 @@ export * from './auth';
 export * from './user';
 export * from './rooming-house';
 export * from './device';
+export * from './onboarding';
