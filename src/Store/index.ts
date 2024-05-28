@@ -20,6 +20,7 @@ import {
   userReducers,
   roomingHouseReducers,
   deviceReducers,
+  onboardingReducers,
 } from './reducers';
 
 const reducers = combineReducers({
@@ -31,12 +32,13 @@ const reducers = combineReducers({
   auth: authReducers,
   roomingHouse: roomingHouseReducers,
   device: deviceReducers,
+  onboarding: onboardingReducers,
 });
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['theme', 'auth'],
+  whitelist: ['theme', 'auth', 'onboarding'],
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);

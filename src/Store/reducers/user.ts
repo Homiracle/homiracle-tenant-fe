@@ -21,10 +21,13 @@ const slice = createSlice({
     setUser: (state, { payload: { ...user } }) => {
       state.user = user;
     },
+    removeUser: (state) => {
+      state.user = initUser;
+    },
   },
 });
 
 export const selectUserId = (state: RootState) => state.user.user?.user_id;
 
-export const { setUser } = slice.actions;
+export const { setUser, removeUser } = slice.actions;
 export const userReducers = slice.reducer;

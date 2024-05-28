@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
 import OnboardingPlugin from 'react-native-onboarding-swiper';
 import { RootScreens } from '../../Constants/RootScreen';
@@ -9,12 +9,34 @@ import Onboarding3 from '../../static/image/Onboarding3';
 import DotIcon from '../../static/icon/DotIcon';
 import { Dimensions } from 'react-native';
 import { Button } from 'react-native-paper';
+import { useAppDispatch } from '../../Store/hook';
+import { hideOnboarding } from '../../Store/reducers';
+import { CustomStatusBar } from '../../Components';
+import { useAppTheme } from '../../Theme';
+import { OnboardingContext } from '../../Hooks/OnboardingContext';
 
 export const Onboarding = (props: {
   onNavigate: (string: RootScreens) => void;
 }) => {
+  const theme = useAppTheme();
+
+  const dispatch = useAppDispatch();
+  const onboardingContext = useContext(OnboardingContext);
+
+  if (!onboardingContext) {
+    throw new Error('useOnboarding must be used within a OnboardingProvider');
+  }
+
+  const { setIsShowOnboarding } = onboardingContext;
+
+  const goToAuthStack = () => {
+    dispatch(hideOnboarding());
+    setIsShowOnboarding(false);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <CustomStatusBar backgroundColor={theme.colors.onPrimary} />
       <OnboardingPlugin
         containerStyles={styles.container}
         imageContainerStyles={styles.image}
@@ -59,10 +81,7 @@ export const Onboarding = (props: {
           </Button>
         )}
         SkipButtonComponent={(props: any) => (
-          <Button
-            onPress={() => props.onNavigate(RootScreens.MAIN)}
-            style={styles.buttonLeft}
-          >
+          <Button onPress={goToAuthStack} style={styles.buttonLeft}>
             Bỏ qua
           </Button>
         )}
@@ -75,7 +94,7 @@ export const Onboarding = (props: {
               mode='contained'
               buttonColor='#10B981'
               style={{ width: 120, borderRadius: 10, alignSelf: 'center' }}
-              onPress={() => props.onNavigate('AuthStack' as never)}
+              onPress={goToAuthStack}
             >
               Bắt đầu
             </Button>
