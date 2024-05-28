@@ -89,7 +89,7 @@ export const RoomDetail = ({
           setIsAccept={setIsAccept}
         />
       )}
-      {activeTab === 3 && <Predict roomId = {room_id}/>}
+      {activeTab === 3 && <Predict roomId = {room_id} id = {attendance_id} />}
       <Portal>
         <CustomDialog
           visible={isOk}
