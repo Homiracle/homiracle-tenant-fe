@@ -24,6 +24,6 @@ const baseQueryWithInterceptor = async (args: string | FetchArgs, api: BaseQuery
 export const IoTAPI = createApi({
   reducerPath: 'iotApi',
   baseQuery: baseQueryWithInterceptor,
-  // tagTypes: ['RoomingHouse', 'Device', 'Attendance'],
+  tagTypes: ['DeviceData'],
   endpoints: () => ({}),
 });

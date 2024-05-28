@@ -19,6 +19,7 @@ const IotDeviceApi = IoTAPI.injectEndpoints({
   endpoints: build => ({
     getDataIotDevices: build.query<any, string>({
       query: id => `devices/${id}/data/latest`,
+      providesTags: ['DeviceData'],
     }),
   }),
   overrideExisting: true,
