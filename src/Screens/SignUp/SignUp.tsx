@@ -16,7 +16,7 @@ export const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChecked, setChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const role = 'landlord';
+  const role = 'tenant';
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
