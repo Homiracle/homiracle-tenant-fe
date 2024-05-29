@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Login from '../../static/image/login';
 import Logo from '../../static/image/logo';
 import { useNavigation } from '@react-navigation/native';
@@ -31,8 +31,10 @@ export const SignIn = () => {
       const { accessToken, refreshToken, user } = data as any;
       dispatch(saveToken({ accessToken, refreshToken }));
       dispatch(setUser({ user }));
+    } else if (isError) {
+      Alert.alert("Lỗi", "Đăng nhập thất bại. Vui lòng thử lại.")
     }
-  }, [isSuccess]);
+  }, [isSuccess, isError]);
 
   const handleSignUp = () => {
     navigation.navigate(RootScreens.SIGNUP as never);

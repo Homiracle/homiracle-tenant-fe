@@ -42,7 +42,7 @@ export const RoomDetail = ({
   const focusPredict = () => {
     setActiveTab(3);
   };
-  
+
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -61,12 +61,14 @@ export const RoomDetail = ({
             onFocus={focusDevice}
           />
         )}
-      <TabButton
-        isClicked={activeTab === 3}
-        name={tabs[3]}
-        displayNumber={false}
-        onFocus={focusPredict}
-      />
+        {tabName === AttendanceStatus.ACCEPTED && (
+          <TabButton
+            isClicked={activeTab === 3}
+            name={tabs[3]}
+            displayNumber={false}
+            onFocus={focusPredict}
+          />
+        )}
         <TabButton
           isClicked={activeTab === 1}
           name={tabs[0]}
@@ -79,9 +81,10 @@ export const RoomDetail = ({
           displayNumber={false}
           onFocus={focusTenant}
         />
-
       </TabView>
-      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && <DeviceComponent id={attendance_id} navigation={navigation}/>}
+      {activeTab === 0 && tabName === AttendanceStatus.ACCEPTED && (
+        <DeviceComponent id={attendance_id} navigation={navigation} />
+      )}
       {activeTab === 1 && (
         <RoomInfo
           tabName={tabName}
@@ -90,7 +93,9 @@ export const RoomDetail = ({
           setIsAccept={setIsAccept}
         />
       )}
-      {activeTab === 3 && <Predict roomId = {room_id} id = {attendance_id} />}
+      {activeTab === 3 && tabName === AttendanceStatus.ACCEPTED && (
+        <Predict roomId={room_id} id={attendance_id} />
+      )}
       <Portal>
         <CustomDialog
           visible={isOk}
