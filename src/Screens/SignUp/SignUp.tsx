@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Button, Checkbox, TextInput } from 'react-native-paper';
 import { useSignUpMutation } from '../../Services';
 import Logo from '../../static/image/logo';
@@ -20,20 +20,26 @@ export const SignUp = () => {
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  const [signup, { data, isSuccess, isLoading, error }] = useSignUpMutation();
+  const [signup, { data, isSuccess, isLoading, error, isError }] = useSignUpMutation();
   const handleSignUp = () => {
     // Thực hiện xử lý đăng ký ở đây
     signup({ email, password, user_name, role, phone });
-    console.log(
-      `Email: ${email}, Full Name: ${user_name}, Password: ${password}, Confirm Password: ${confirmPassword}, Agreement: ${isChecked}`,
-    );
+    // console.log(
+    //   `Email: ${email}, Full Name: ${user_name}, Password: ${password}, Confirm Password: ${confirmPassword}, Agreement: ${isChecked}`,
+    // );
   };
   useEffect(() => {
     if (isSuccess) {
-      console.log(data);
-      navigation.navigate('SignIn' as never);
+      // console.log(data);
+      Alert.alert("", "Đăng ký tài khoản thành công!", [{
+        text: "OK",
+        onPress: () => navigation.navigate('SignIn' as never),
+        style: "default"
+      }])
+    } else if (isError) {
+      Alert.alert("Lỗi", "Đăng ký tài khoản thất bại. Vui lòng thử lại")
     }
-  }, [isSuccess]);
+  }, [isSuccess, isError]);
 
   // useEffect(() => {
   //   if (error) {

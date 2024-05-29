@@ -253,6 +253,7 @@ export const RoomInfo = ({
             textColor={theme.colors.error}
             onPress={handleDenyRoom}
             loading={denyLoading}
+            disabled={denyLoading || isLoading}
           >
             Từ chối
           </Button>
@@ -261,6 +262,7 @@ export const RoomInfo = ({
             style={styles.accept}
             onPress={handleAcceptRoom}
             loading={isLoading}
+            disabled={denyLoading || isLoading}
           >
             Đồng ý
           </Button>

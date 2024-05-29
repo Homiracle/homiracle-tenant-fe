@@ -26,7 +26,7 @@ export const RoomList = ({
 
   useEffect(() => {
     if (isSuccess) {
-      console.log(JSON.stringify(data));
+      // console.log(JSON.stringify(data));
     }
   }, [isSuccess]);
 
