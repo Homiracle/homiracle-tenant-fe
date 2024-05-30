@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text } from 'react-native-paper';
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useAppTheme } from '../../Theme';
@@ -30,7 +30,7 @@ export const AirConditionerScreen = ({
   name,
   value,
   navigation,
-  setDeviceArray
+  setDeviceArray,
 }: {
   id: string;
   name: string;
@@ -65,20 +65,41 @@ export const AirConditionerScreen = ({
 
   const { socketInstance, message, isConnected } = useSocket();
 
-  const handleSetDeviceArray = (val: any, field: string) => {
-    setDeviceArray((prev: any) => prev.map((device: DeviceExt) => {
-      if (device.device_id === id) {
-        return {
-          ...device,
-          value: {
-            ...device.value,
-            [field]: val,
-          },
-        };
+  useEffect(() => {
+    if (message) {
+      // console.log('Message:', message);
+      const { deviceId, value } = message as {
+        deviceId: string;
+        value: string;
+      };
+      // { value: number; status: boolean; mode: AirConditionerMode }
+      if (deviceId === id) {
+        setCurrentValue(JSON.parse(value).value);
+        setIsOn(JSON.parse(value).status);
+        setCurrentMode(JSON.parse(value).mode);
+        handleSetDeviceArray(JSON.parse(value).value, 'value');
+        handleSetDeviceArray(JSON.parse(value).status, 'status');
+        handleSetDeviceArray(JSON.parse(value).mode, 'mode');
       }
-      return device;
-    }));
-  }
+    }
+  }, [message]);
+
+  const handleSetDeviceArray = (val: any, field: string) => {
+    setDeviceArray((prev: any) =>
+      prev.map((device: DeviceExt) => {
+        if (device.device_id === id) {
+          return {
+            ...device,
+            value: {
+              ...device.value,
+              [field]: val,
+            },
+          };
+        }
+        return device;
+      }),
+    );
+  };
 
   const onPressPlus = () => {
     if (!socketInstance || !isConnected) {
@@ -97,7 +118,7 @@ export const AirConditionerScreen = ({
       handleSetDeviceArray(currentValue + 1, 'value');
       socketInstance.emit('control', {
         deviceId: id,
-        value: { ...value, value: currentValue + 1},
+        value: { ...value, value: currentValue + 1 },
       });
     }
   };
@@ -176,7 +197,9 @@ export const AirConditionerScreen = ({
               : theme.colors.backdrop,
         },
       ]}
-      onPress={() => {isOn && changeMode(mode)}}
+      onPress={() => {
+        isOn && changeMode(mode);
+      }}
     >
       <Icon
         name={
@@ -218,7 +241,11 @@ export const AirConditionerScreen = ({
           paddingTop: wp(20),
         }}
       >
-        <TouchableOpacity onPress={() => {isOn && onPressMinus()}}>
+        <TouchableOpacity
+          onPress={() => {
+            isOn && onPressMinus();
+          }}
+        >
           <Icon
             name='minus'
             size={40}
@@ -239,7 +266,9 @@ export const AirConditionerScreen = ({
           name='plus'
           size={40}
           color={isOn ? theme.colors.primary : theme.colors.backdrop}
-          onPress={() => {isOn && onPressPlus()}}
+          onPress={() => {
+            isOn && onPressPlus();
+          }}
         />
       </View>
       <View
