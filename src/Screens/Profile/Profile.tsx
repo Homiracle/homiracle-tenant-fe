@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Header } from '../../Components';
 import { useAppTheme } from '../../Theme';
-import { useAppSelector } from '../../Store/hook';
+import { useAppDispatch, useAppSelector } from '../../Store/hook';
 import { RootScreens } from '../../Constants/RootScreen';
 import { useNavigation } from '@react-navigation/native';
 import { View, StyleSheet, TouchableHighlight, Image } from 'react-native';
@@ -10,6 +10,9 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext, AuthContextProps } from '../../Hooks/AuthContext';
+import { removeUser, selectUser, signout } from '../../Store/reducers';
 
 export const Profile = () => {
   const theme = useAppTheme();
@@ -61,7 +64,42 @@ export const Profile = () => {
     },
   });
 
-  const { user } = useAppSelector(rootState => rootState.user);
+  const user = useAppSelector(selectUser);
+  const dispatch = useAppDispatch();
+
+  const authContext = useContext<AuthContextProps>(
+    AuthContext as React.Context<AuthContextProps>,
+  ); // Update the type of AuthContext
+
+  const { setIsGuest } = authContext;
+
+  const handleLogout = async () => {
+    // handle logout here
+    setIsGuest(true);
+    dispatch(signout());
+    dispatch(removeUser());
+    try {
+      // Lấy trạng thái lưu trữ hiện tại
+      const persistedState = await AsyncStorage.getItem('persist:root');
+      if (persistedState !== null) {
+        const parsedState = JSON.parse(persistedState);
+
+        // Xóa token đăng nhập
+        if (parsedState.auth) {
+          parsedState.auth = JSON.stringify({
+            accessToken: null,
+            refreshToken: null,
+          });
+        }
+
+        // Lưu lại trạng thái đã cập nhật
+        await AsyncStorage.setItem('persist:root', JSON.stringify(parsedState));
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+
+  };
 
   const profile = {
     user_name: user.user_name || 'Sample',
@@ -172,6 +210,13 @@ export const Profile = () => {
               Xác thực CCCD
             </Button>
           </TouchableHighlight>
+          <Button
+            mode='outlined'
+            style={{ width: wp(50), alignSelf: 'center' }}
+            onPress={handleLogout}
+          >
+            Đăng xuất
+          </Button>
         </View>
       </Header>
     </View>

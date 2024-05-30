@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Login from '../../static/image/login';
 import Logo from '../../static/image/logo';
 import { useNavigation } from '@react-navigation/native';
@@ -8,11 +8,14 @@ import { Button, TextInput } from 'react-native-paper';
 import { useSigninMutation } from '../../Services';
 import { useAppDispatch } from '../../Store/hook';
 import { saveToken, setUser } from '../../Store/reducers';
+import { CustomStatusBar } from '../../Components';
+import { useAppTheme } from '../../Theme';
 
 export const SignIn = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('tenant1@gmail.com');
-  const [password, setPassword] = useState('Abc_123456789');
+  const theme = useAppTheme();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -27,17 +30,22 @@ export const SignIn = () => {
     if (isSuccess) {
       const { accessToken, refreshToken, user } = data as any;
       dispatch(saveToken({ accessToken, refreshToken }));
-      dispatch(setUser(user));
-      navigation.navigate('TabNavigator' as never);
+      dispatch(setUser({ user }));
+    } else if (isError) {
+      Alert.alert("Lỗi", "Đăng nhập thất bại. Vui lòng thử lại.")
     }
-  }, [isSuccess]);
+  }, [isSuccess, isError]);
 
   const handleSignUp = () => {
-    navigation.navigate(RootScreens.SIGNIN as never);
+    navigation.navigate(RootScreens.SIGNUP as never);
   };
 
   return (
     <View style={styles.container}>
+      <CustomStatusBar
+        backgroundColor={theme.colors.onPrimary}
+        barStyle='dark-content'
+      />
       <Login />
       <View style={styles.container1}>
         <View style={[styles.leftContainer, { flex: 8 }]}>
@@ -78,8 +86,8 @@ export const SignIn = () => {
       <Button
         style={styles.button}
         onPress={handleLogin}
-        // loading={isLoading}
-        // disabled={isLoading}
+        loading={isLoading}
+        disabled={isLoading}
         mode='outlined'
       >
         Đăng nhập
@@ -100,7 +108,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 70,
     alignItems: 'center',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#fff',
   },
   logo: {
     width: 148,
