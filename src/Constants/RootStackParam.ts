@@ -1,3 +1,5 @@
+import React from 'react';
+import { DeviceExt } from '../Screens/RoomDetail/Device';
 import { DeviceType } from './DeviceType';
 import { RootScreens } from './RootScreen';
 
@@ -13,8 +15,18 @@ export type RootStackParamList = {
   [RootScreens.NOTIFICATION]: undefined;
   [RootScreens.ROOM]: undefined;
   [RootScreens.PAYMENT]: undefined;
-  [RootScreens.ROOM_DETAIL]: { attendance_id: number; room_id: string, name: string, screenName?: string};
-  [RootScreens.DEVICE_DETAIL]: { device_id: string; device_type: DeviceType; device_name: string };
+  [RootScreens.ROOM_DETAIL]: {
+    attendance_id: number;
+    room_id: string;
+    name: string;
+    screenName?: string;
+  };
+  [RootScreens.DEVICE_DETAIL]: {
+    device_id: string;
+    device_type: DeviceType;
+    device_name: string;
+    setDeviceArray: React.Dispatch<React.SetStateAction<DeviceExt[]>>;
+  };
   AuthStack: undefined;
   HomeStack: undefined;
   RoomStack: undefined;
