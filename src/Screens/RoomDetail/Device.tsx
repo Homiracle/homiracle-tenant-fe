@@ -1,7 +1,7 @@
 import { DeviceType } from '../../Constants/DeviceType';
 import { CardCustom, CardCustomForControlledDevice } from '../../Components';
 import { useAppTheme } from '../../Theme';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Card, Switch, Text } from 'react-native-paper';
 import {
@@ -18,8 +18,9 @@ import { useSocket } from '../../Hooks';
 import { useAppDispatch } from '../../Store/hook';
 import { setDevice, updateDevice } from '../../Store/reducers';
 import { AirConditionerMode } from '../DeviceDetail/AirConditionerScreen';
+import { useFocusEffect } from '@react-navigation/native';
 
-interface DeviceExt extends Device {
+export interface DeviceExt extends Device {
   value?: any;
 }
 
@@ -97,52 +98,63 @@ export const DeviceComponent = ({
   /**
    * listen to device data change
    */
+
+  const handleSetValue = (device: DeviceExt, value: any) => {
+    setDeviceArray(prev => {
+      return prev.map(d => {
+        if (d.device_id === device.device_id) {
+          return {
+            ...d,
+            value: value,
+          };
+        }
+        return d;
+      });
+    });
+    dispatch(
+      setDevice({
+        id: device.device_id,
+        name: device.name,
+        type: device.type,
+        value: value,
+      }),
+    );
+  };
+
   useEffect(() => {
     if (deviceSuccess && deviceData) {
-      console.log('🚀 ~ useEffect ~ deviceData:', deviceData);
+      // console.log('🚀 ~ useEffect ~ deviceData:', deviceData);
       const devices = deviceData as DeviceExt[];
       setDeviceArray(devices);
 
       const promises = devices.map(device => {
-        return getDataIotDevices(device.device_id).then(res => {
-          let value = res.data?.value;
-          switch (device.type) {
-            case DeviceType.LIGHT:
-              value = value || { status: false };
-              break;
-            case DeviceType.FAN:
-              value = value || { status: false };
-              break;
-            case DeviceType.AIR_CONDITIONER:
-              value = value || {
-                status: true,
-                value: 25,
-                mode: AirConditionerMode.COOL,
-              };
-              break;
-            default:
-              break;
-          }
-          setDeviceArray(prev => {
-            return prev.map(d => {
-              if (d.device_id === device.device_id) {
-                return {
-                  ...d,
-                  value: res.data?.value || value,
-                };
-              }
-              return d;
+        switch (device.type) {
+          case DeviceType.LIGHT:
+            let valueLight = { status: false };
+            handleSetValue(device, valueLight);
+            break;
+          case DeviceType.FAN:
+            let valueFan = { status: false };
+            handleSetValue(device, valueFan);
+            break;
+          case DeviceType.AIR_CONDITIONER:
+            let valueAir = {
+              status: true,
+              value: 25,
+              mode: AirConditionerMode.COOL,
+            };
+            handleSetValue(device, valueAir);
+            break;
+          case DeviceType.ELECTRIC_METER:
+          case DeviceType.WATER_METER:
+            getDataIotDevices(device.device_id).then(res => {
+              let value = res.data?.value;
+              handleSetValue(device, value);
             });
-          });          
-          dispatch(
-            setDevice({
-              id: device.device_id,
-              name: device.name,
-              type: device.type,
-              value: value,
-            }),
-          );
-        });
+            break;
+          default:
+            break;
+        }
       });
 
       // Đợi tất cả các promise hoàn thành
@@ -156,9 +168,60 @@ export const DeviceComponent = ({
   /**
    * listen to iot data change
    */
-  const { socketInstance, message, isConnected } = useSocket();
+
+  const handleUpdateValue = (device: DeviceExt, value: any) => {
+    switch (device.type) {
+      case DeviceType.ELECTRIC_METER:
+      case DeviceType.WATER_METER:
+        dispatch(
+          updateDevice({
+            id: device.device_id,
+            value: JSON.parse(value),
+            field: 'value',
+          }),
+        );
+        break;
+      case DeviceType.LIGHT:
+      case DeviceType.FAN:
+        dispatch(
+          updateDevice({
+            id: device.device_id,
+            value: JSON.parse(value),
+            field: 'status',
+          }),
+        );
+        break;
+      case DeviceType.AIR_CONDITIONER:
+        dispatch(
+          updateDevice({
+            id: device.device_id,
+            value: JSON.parse(value),
+            field: 'all',
+          }),
+        );
+        break;
+      default:
+        break;
+    }
+  };
+  const { socketInstance, message, isConnected, connectSocket, disconnectSocket } = useSocket();
+
+  // Handle socket reconnection using useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Connecting to socket');
+      connectSocket();
+
+      return () => {
+        console.log('Disconnecting from socket');
+        disconnectSocket();
+      };
+    }, [connectSocket, disconnectSocket])
+  );
+
   useEffect(() => {
     if (message && dataLoaded) {
+      // console.log("🚀 ~ useEffect ~ message:", message)
       const { deviceId, value } = message;
       setDeviceArray(prev => {
         return prev.map(d => {
@@ -171,7 +234,8 @@ export const DeviceComponent = ({
           return d;
         });
       });
-      dispatch(updateDevice({ id: deviceId, value: JSON.parse(value), field: 'value' }));
+      const device = deviceArray.find(d => d.device_id === deviceId) as DeviceExt;
+      handleUpdateValue(device, value);
     }
   }, [message]);
 
@@ -179,7 +243,7 @@ export const DeviceComponent = ({
    * handle on switch
    */
   const handleOnSwitch = (value: boolean, deviceId: string) => {
-    console.log("🚀 ~ handleOnSwitch ~ value:", value)
+    // console.log('🚀 ~ handleOnSwitch ~ value:', value);
     if (!socketInstance || !isConnected) {
       console.log('Socket is not connected');
       return;
@@ -196,13 +260,19 @@ export const DeviceComponent = ({
       });
     });
 
-    dispatch(updateDevice({ id: deviceId, value: { status: value }, field: 'status' }));
+    dispatch(
+      updateDevice({ id: deviceId, value: { status: value }, field: 'status' }),
+    );
+
+    const device = deviceArray.find(d => d.device_id === deviceId) as DeviceExt;
 
     socketInstance.emit('control', {
       deviceId: deviceId,
-      value: { status: value },
+      value: { ...device.value, status: value },
     });
   };
+
+  // console.log('🚀 ~ deviceArray:', deviceArray);
 
   return (
     <ScrollView
@@ -281,6 +351,7 @@ export const DeviceComponent = ({
                       handleOnSwitch(value, device.device_id)
                     }
                     navigation={navigation}
+                    setDeviceArray={setDeviceArray}
                   />
                 );
               case DeviceType.FAN:
@@ -295,6 +366,7 @@ export const DeviceComponent = ({
                       handleOnSwitch(value, device.device_id)
                     }
                     navigation={navigation}
+                    setDeviceArray={setDeviceArray}
                   />
                 );
               case DeviceType.AIR_CONDITIONER:
@@ -309,6 +381,7 @@ export const DeviceComponent = ({
                       handleOnSwitch(value, device.device_id)
                     }
                     navigation={navigation}
+                    setDeviceArray={setDeviceArray}
                   />
                 );
               default:

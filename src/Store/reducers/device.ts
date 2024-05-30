@@ -21,11 +21,16 @@ const slice = createSlice({
     updateDevice: (state, { payload: { id, value, field } }) => {
       const index = state.findIndex(device => device.id === id);
       if (index !== -1) {
+        if (state[index].type === DeviceType.AIR_CONDITIONER && field === 'all') {
+          state[index].value = value;
+          return;
+        }
         state[index].value = {
           ...state[index].value,
           [field]: value[field],
         };
       }
+      // console.log(state);
     },
   },
 });
