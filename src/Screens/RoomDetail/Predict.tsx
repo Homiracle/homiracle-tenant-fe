@@ -72,7 +72,7 @@ export const Predict = ({ roomId, id }: {id: number, roomId: string }) => {
 
     const dateE = new Date().toISOString().split('T')[0];
     const dateS = new Date();
-    dateS.setDate(1);
+    dateS.setDate(dateS.getDate() - 7);
     const formattedDateS = dateS.toISOString().split('T')[0];
     const [start, setStart] = useState(formattedDateS);
     const [end, setEnd] = useState(dateE);
@@ -81,6 +81,7 @@ export const Predict = ({ roomId, id }: {id: number, roomId: string }) => {
         endDate: false,
       });
     const { data: DetailData } = useGetConsumptionQuery({roomId, start, end});
+
     const totalElectric = DetailData?.reduce((total, item) => total + item.electric, 0);
     
     const chartData = DetailData?.map((item: any, index: number) => {
@@ -102,37 +103,32 @@ return (
   <View style={styles.container}>
     <Surface style={styles.surface}>
       <Text style={styles.title}>Dự đoán tiêu thụ điện</Text>
-      {datetimePicker.startDate && (
+      {(datetimePicker.startDate || datetimePicker.endDate) && (
         <DateTimePicker
           value={new Date(start)}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
-            if (selectedDate) {
-              const currentDate = selectedDate.toISOString().split('T')[0];
-              setStart(currentDate);
+            if (datetimePicker.startDate) {
+              showDatetimePicker({
+                ...datetimePicker,
+                startDate: false,
+              });
+              if (selectedDate) {
+                const currentDate = selectedDate.toISOString().split('T')[0];
+                setStart(currentDate);
+              }
             }
-            showDatetimePicker({
-              ...datetimePicker,
-              startDate: false,
-            });
-          }}
-        />
-      )}
-      {datetimePicker.endDate && (
-        <DateTimePicker
-          value={new Date(end)}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            if (selectedDate) {
-              const currentDate = selectedDate.toISOString().split('T')[0];
-              setEnd(currentDate);
+            else if (datetimePicker.endDate) {
+              showDatetimePicker({
+                ...datetimePicker,
+                endDate: false,
+              });
+              if (selectedDate) {
+                const currentDate = selectedDate.toISOString().split('T')[0];
+                setEnd(currentDate);
+              }
             }
-            showDatetimePicker({
-              ...datetimePicker,
-              endDate: false,
-            });
           }}
         />
       )}
