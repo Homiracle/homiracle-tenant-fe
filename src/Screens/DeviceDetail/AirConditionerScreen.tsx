@@ -18,8 +18,8 @@ export enum AirConditionerMode {
   COOL = 'Cool',
   HEAT = 'Heat',
   FAN = 'Fan',
-  DRY = 'Dry',
-  AUTO = 'Auto',
+  // DRY = 'Dry',
+  // AUTO = 'Auto',
 }
 
 const MAX_TEMP = 30;
@@ -39,10 +39,14 @@ export const AirConditionerScreen = ({
   setDeviceArray: React.Dispatch<React.SetStateAction<DeviceExt[]>>;
 }) => {
   const theme = useAppTheme();
+  const [currentValue, setCurrentValue] = React.useState(value.value);
+  const [isOn, setIsOn] = React.useState(value.status);
+  const [currentMode, setCurrentMode] = React.useState(value.mode);
+  const dispatch = useAppDispatch();
 
   const styles = StyleSheet.create({
     fill: {
-      color: theme.colors.primary,
+      color: isOn ? theme.colors.primary : theme.colors.backdrop,
       fontSize: 40,
       fontWeight: 'bold',
     },
@@ -55,11 +59,6 @@ export const AirConditionerScreen = ({
       color: theme.colors.onPrimary,
     },
   });
-
-  const [currentValue, setCurrentValue] = React.useState(value.value);
-  const [isOn, setIsOn] = React.useState(value.status);
-  const [currentMode, setCurrentMode] = React.useState(value.mode);
-  const dispatch = useAppDispatch();
 
   let fill = (currentValue / MAX_TEMP) * 100;
 
@@ -245,6 +244,8 @@ export const AirConditionerScreen = ({
           onPress={() => {
             isOn && onPressMinus();
           }}
+          // activeOpacity={2}
+          style={{ padding: 10 }} // Thêm padding để mở rộng vùng nhấn
         >
           <Icon
             name='minus'
@@ -262,14 +263,19 @@ export const AirConditionerScreen = ({
         >
           {fill => <Text style={styles.fill}>{currentValue + ' °C'}</Text>}
         </AnimatedCircularProgress>
-        <Icon
-          name='plus'
-          size={40}
-          color={isOn ? theme.colors.primary : theme.colors.backdrop}
+        <TouchableOpacity
           onPress={() => {
             isOn && onPressPlus();
           }}
-        />
+          // activeOpacity={2}
+          style={{ padding: 10 }} // Thêm padding để mở rộng vùng nhấn
+        >
+          <Icon
+            name='plus'
+            size={40}
+            color={isOn ? theme.colors.primary : theme.colors.backdrop}
+          />
+        </TouchableOpacity>
       </View>
       <View
         style={{
@@ -303,13 +309,13 @@ export const AirConditionerScreen = ({
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
+          flexGrow: 1,
           justifyContent: 'center',
-          marginTop: hp(4),
+          alignItems: 'center',
           paddingHorizontal: wp(4),
+          marginTop: hp(4),
         }}
-        ItemSeparatorComponent={() => (
-          <View style={{ width: wp(6), padding: 6 }} />
-        )}
+        ItemSeparatorComponent={() => <View style={{ width: wp(4) }} />}
       />
     </View>
   );

@@ -98,6 +98,7 @@ const attendanceApi = API.injectEndpoints({
 
 export const {
   useGetAcceptedRoomsQuery,
+  useLazyGetAcceptedRoomsQuery,
   useAcceptRoomMutation,
   useDenyRoomMutation,
   useGetDetailRoomQuery,

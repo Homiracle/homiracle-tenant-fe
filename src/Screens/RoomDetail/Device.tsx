@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   useLazyGetDataIotDevicesQuery,
   useGetDevicesQuery,
+  useLazyGetDevicesQuery,
 } from '../../Services';
 import type { Device } from '../../Services/devices/type';
 import { useSocket } from '../../Hooks';
@@ -19,6 +20,7 @@ import { useAppDispatch } from '../../Store/hook';
 import { setDevice, updateDevice } from '../../Store/reducers';
 import { AirConditionerMode } from '../DeviceDetail/AirConditionerScreen';
 import { useFocusEffect } from '@react-navigation/native';
+import { RefreshControl } from 'react-native-gesture-handler';
 
 export interface DeviceExt extends Device {
   value?: any;
@@ -49,6 +51,9 @@ export const DeviceComponent = ({
     isLoading: deviceLoading,
     error: deviceError,
   } = useGetDevicesQuery(id);
+
+  const [getDevices, { isSuccess: _deviceSuccess, data: _deviceData }] =
+    useLazyGetDevicesQuery();
 
   /**
    * Fetch iot data from iot server
@@ -121,49 +126,62 @@ export const DeviceComponent = ({
     );
   };
 
+  const runPromise = (devices: DeviceExt[]) => {
+    const promises = devices.map(device => {
+      switch (device.type) {
+        case DeviceType.LIGHT:
+          // let valueLight = { status: false };
+          // handleSetValue(device, valueLight);
+          // break;
+        case DeviceType.FAN:
+          // let valueFan = { status: false };
+          // handleSetValue(device, valueFan);
+          // break;
+        case DeviceType.AIR_CONDITIONER:
+          // let valueAir = {
+          //   status: true,
+          //   value: 25,
+          //   mode: AirConditionerMode.COOL,
+          // };
+          // handleSetValue(device, valueAir);
+          // break;
+        case DeviceType.ELECTRIC_METER:
+        case DeviceType.WATER_METER:
+          getDataIotDevices(device.device_id).then(res => {
+            let value = res.data?.value;
+            handleSetValue(device, value);
+          });
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Đợi tất cả các promise hoàn thành
+    Promise.all(promises).then(() => {
+      console.log('All promises are resolved');
+      setDataLoaded(true);
+    });
+  }
+
   useEffect(() => {
     if (deviceSuccess && deviceData) {
       // console.log('🚀 ~ useEffect ~ deviceData:', deviceData);
       const devices = deviceData as DeviceExt[];
       setDeviceArray(devices);
-
-      const promises = devices.map(device => {
-        switch (device.type) {
-          case DeviceType.LIGHT:
-            let valueLight = { status: false };
-            handleSetValue(device, valueLight);
-            break;
-          case DeviceType.FAN:
-            let valueFan = { status: false };
-            handleSetValue(device, valueFan);
-            break;
-          case DeviceType.AIR_CONDITIONER:
-            let valueAir = {
-              status: true,
-              value: 25,
-              mode: AirConditionerMode.COOL,
-            };
-            handleSetValue(device, valueAir);
-            break;
-          case DeviceType.ELECTRIC_METER:
-          case DeviceType.WATER_METER:
-            getDataIotDevices(device.device_id).then(res => {
-              let value = res.data?.value;
-              handleSetValue(device, value);
-            });
-            break;
-          default:
-            break;
-        }
-      });
-
-      // Đợi tất cả các promise hoàn thành
-      Promise.all(promises).then(() => {
-        console.log('All promises are resolved');
-        setDataLoaded(true);
-      });
+      runPromise(devices);
     }
-  }, [deviceSuccess]);
+  }, [deviceSuccess, deviceData]);
+
+  useEffect(() => {
+    if (_deviceSuccess && _deviceData) {
+      // console.log('🚀 ~ useEffect ~ deviceData:', deviceData);
+      const devices = _deviceData as DeviceExt[];
+      setDeviceArray(devices);
+      runPromise(devices);
+    }
+  }, [_deviceSuccess, _deviceData]);
+  
 
   /**
    * listen to iot data change
@@ -204,7 +222,13 @@ export const DeviceComponent = ({
         break;
     }
   };
-  const { socketInstance, message, isConnected, connectSocket, disconnectSocket } = useSocket();
+  const {
+    socketInstance,
+    message,
+    isConnected,
+    connectSocket,
+    disconnectSocket,
+  } = useSocket();
 
   // Handle socket reconnection using useFocusEffect
   useFocusEffect(
@@ -216,7 +240,7 @@ export const DeviceComponent = ({
         console.log('Disconnecting from socket');
         disconnectSocket();
       };
-    }, [connectSocket, disconnectSocket])
+    }, [connectSocket, disconnectSocket]),
   );
 
   useEffect(() => {
@@ -234,7 +258,9 @@ export const DeviceComponent = ({
           return d;
         });
       });
-      const device = deviceArray.find(d => d.device_id === deviceId) as DeviceExt;
+      const device = deviceArray.find(
+        d => d.device_id === deviceId,
+      ) as DeviceExt;
       handleUpdateValue(device, value);
     }
   }, [message]);
@@ -273,6 +299,15 @@ export const DeviceComponent = ({
   };
 
   // console.log('🚀 ~ deviceArray:', deviceArray);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      // Cập nhật dữ liệu mới
+      const devices = getDevices(id);
+      setRefreshing(false);
+    }, 2000);
+  };
 
   return (
     <ScrollView
@@ -280,6 +315,13 @@ export const DeviceComponent = ({
         paddingHorizontal: wp(2),
         paddingBottom: hp(2),
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[theme.colors.primary]}
+        />
+      }
     >
       <View
         style={{

@@ -25,5 +25,5 @@ const IotDeviceApi = IoTAPI.injectEndpoints({
   overrideExisting: true,
 });
 
-export const { useGetDevicesQuery } = deviceApi;
+export const { useGetDevicesQuery, useLazyGetDevicesQuery } = deviceApi;
 export const { useLazyGetDataIotDevicesQuery } = IotDeviceApi;
