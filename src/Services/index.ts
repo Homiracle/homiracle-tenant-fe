@@ -8,3 +8,4 @@ export * from './contract';
 export * from './devices';
 export * from './payment';
 export * from './consumption';
+export * from './prediction';
