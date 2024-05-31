@@ -5,7 +5,7 @@ import { useAppTheme } from '../../Theme';
 import {LineChart, BarChart} from 'react-native-gifted-charts';
 import { Picker } from '@react-native-picker/picker';
 import { ScrollView } from "native-base";
-import { useGetConsumptionQuery} from "../../Services";
+import { useGetConsumptionQuery, useGetPredictionQuery} from "../../Services";
 import { useGetDetailRoomQuery } from "../../Services/attendances";
 import {
     heightPercentageToDP as hp,
@@ -13,6 +13,8 @@ import {
   } from 'react-native-responsive-screen';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Surface, DataTable } from "react-native-paper";
+import { useAppSelector } from "../../Store/hook";
+import { selectUser } from "../../Store/reducers";
 export const Predict = ({ roomId, id }: {id: number, roomId: string }) => {
 
     const theme = useAppTheme();
@@ -81,6 +83,18 @@ export const Predict = ({ roomId, id }: {id: number, roomId: string }) => {
         endDate: false,
       });
     const { data: DetailData } = useGetConsumptionQuery({roomId, start, end});
+
+    const userId = useAppSelector(selectUser).user_id;
+
+    const { data: predictionData, isSuccess: predictSuccess, error: predictError } = useGetPredictionQuery({user_id: userId, room_id: roomId, end_date: end});
+
+    useEffect(() => {
+        if (predictSuccess) {
+          console.log('Predict success', predictionData);
+        } else if (predictError) {
+          console.log('Predict error', predictError);
+        }
+    }, [predictionData, predictSuccess, predictError]);
 
     const totalElectric = DetailData?.reduce((total, item) => total + item.electric, 0);
     

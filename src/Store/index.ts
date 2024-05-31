@@ -22,10 +22,12 @@ import {
   deviceReducers,
   onboardingReducers,
 } from './reducers';
+import { predictionAPI } from '../Services/prediction/base';
 
 const reducers = combineReducers({
   api: API.reducer,
   iotApi: IoTAPI.reducer,
+  predictionApi: predictionAPI.reducer,
   theme: themeReducers,
   home: homeReducers,
   user: userReducers,
@@ -38,7 +40,7 @@ const reducers = combineReducers({
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['theme', 'auth', 'onboarding'],
+  whitelist: ['theme', 'auth', 'onboarding', 'user'],
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);
@@ -52,7 +54,8 @@ const store = configureStore({
       },
     })
       .concat(API.middleware)
-      .concat(IoTAPI.middleware);
+      .concat(IoTAPI.middleware)
+      .concat(predictionAPI.middleware);
 
     // if (__DEV__ && !process.env.JEST_WORKER_ID) {
     //   const createDebugger = require("redux-flipper").default;
