@@ -18,7 +18,6 @@ export const DeviceDetail = ({
   const name = route.params.device_name;
   const deviceId = route.params.device_id;
   const deviceType = route.params.device_type;
-  const setDeviceArray = route.params.setDeviceArray;
 
   const device = useAppSelector(selectDeviceById(deviceId));
   // console.log("🚀 ~ device:", device?.value)
@@ -37,7 +36,6 @@ export const DeviceDetail = ({
           name={name}
           value={device.value}
           navigation={navigation}
-          setDeviceArray={setDeviceArray!} // Add '!' to assert that setDeviceArray is not undefined
         />
       )}
     </View>

@@ -12,7 +12,7 @@ const slice = createSlice({
   name: 'device',
   initialState: [] as DeviceState[],
   reducers: {
-    setDevice: (state, { payload }) => {
+    setDevice: (state, { payload }: { payload: DeviceState }) => {
       if (state.findIndex(device => device.id === payload.id) !== -1) {
         return;
       }
@@ -21,7 +21,7 @@ const slice = createSlice({
     updateDevice: (state, { payload: { id, value, field } }) => {
       const index = state.findIndex(device => device.id === id);
       if (index !== -1) {
-        if (state[index].type === DeviceType.AIR_CONDITIONER && field === 'all') {
+        if (field === 'all') {
           state[index].value = value;
           return;
         }
@@ -32,6 +32,7 @@ const slice = createSlice({
       }
       // console.log(state);
     },
+    clearDevices: () => [],
   },
 });
 
@@ -39,12 +40,12 @@ export const selectDeviceById = (id: string) =>
   createSelector(
     (state: { device: DeviceState[] }) => state.device,
     (devices: DeviceState[]) => devices.find(device => device.id === id),
-  );  
+  );
 
-export const selectDevice = createSelector(
-  (state: { device: DeviceState }) => state['device'],
-  (device: any) => device,
+export const selectDeviceList = createSelector(
+  (state: { device: DeviceState[] }) => state['device'],
+  (devices: DeviceState[]) => devices,
 );
 
-export const { setDevice, updateDevice } = slice.actions;
+export const { setDevice, updateDevice, clearDevices } = slice.actions;
 export const deviceReducers = slice.reducer;

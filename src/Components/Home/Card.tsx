@@ -80,7 +80,6 @@ export const CardCustomForControlledDevice = ({
   value,
   onValueChange,
   navigation,
-  setDeviceArray,
 }: {
   deviceId: string;
   deviceType: DeviceType;
@@ -88,7 +87,6 @@ export const CardCustomForControlledDevice = ({
   value: boolean;
   onValueChange: (value: boolean) => void;
   navigation?: any;
-  setDeviceArray: React.Dispatch<React.SetStateAction<DeviceExt[]>>;
 }) => {
   const theme = useAppTheme();
   const styles = StyleSheet.create({
@@ -116,7 +114,6 @@ export const CardCustomForControlledDevice = ({
             device_id: deviceId,
             device_type: deviceType,
             device_name: title,
-            setDeviceArray: setDeviceArray,
           });
       }}
     >
