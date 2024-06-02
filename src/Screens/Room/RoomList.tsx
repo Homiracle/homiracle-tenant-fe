@@ -10,6 +10,8 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useAppDispatch } from '../../Store/hook';
+import { clearDevices } from '../../Store/reducers';
 
 export const RoomList = ({
   status,
@@ -21,6 +23,7 @@ export const RoomList = ({
   tabName?: string;
 }) => {
   const theme = useAppTheme();
+  const dispatch = useAppDispatch();
 
   const { data, isSuccess, isLoading } = useGetAcceptedRoomsQuery(status);
 
@@ -49,14 +52,15 @@ export const RoomList = ({
                   borderRadius: 10,
                   padding: 10,
                 }}
-                onPress={() =>
+                onPress={() => {
+                  dispatch(clearDevices());
                   navigation.navigate(RootScreens.ROOM_DETAIL, {
                     attendance_id: item.id,
                     room_id: item.room_id,
                     name: item.name,
                     screenName: tabName,
-                  })
-                }
+                  });
+                }}
               >
                 <View style={{ flexDirection: 'row', gap: wp(4) }}>
                   <Image

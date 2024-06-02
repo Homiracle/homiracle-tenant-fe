@@ -12,6 +12,9 @@ const slice = createSlice({
   name: 'device',
   initialState: [] as DeviceState[],
   reducers: {
+    setDeviceArray: (state, { payload }: { payload: DeviceState[] }) => {
+      return payload;
+    },
     setDevice: (state, { payload }: { payload: DeviceState }) => {
       if (state.findIndex(device => device.id === payload.id) !== -1) {
         return;
@@ -47,5 +50,5 @@ export const selectDeviceList = createSelector(
   (devices: DeviceState[]) => devices,
 );
 
-export const { setDevice, updateDevice, clearDevices } = slice.actions;
+export const { setDeviceArray, setDevice, updateDevice, clearDevices } = slice.actions;
 export const deviceReducers = slice.reducer;
