@@ -40,7 +40,7 @@ const reducers = combineReducers({
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['theme', 'auth', 'onboarding', 'user'],
+  whitelist: ['theme', 'auth', 'onboarding', 'user', 'device'],
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);

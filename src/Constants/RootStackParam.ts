@@ -25,7 +25,6 @@ export type RootStackParamList = {
     device_id: string;
     device_type: DeviceType;
     device_name: string;
-    setDeviceArray: React.Dispatch<React.SetStateAction<DeviceExt[]>>;
   };
   AuthStack: undefined;
   HomeStack: undefined;

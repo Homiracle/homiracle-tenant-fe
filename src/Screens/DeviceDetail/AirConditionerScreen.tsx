@@ -7,12 +7,14 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import { Header } from '../../Components';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppDispatch, useAppSelector } from '../../Store/hook';
-import { updateDevice } from '../../Store/reducers';
+import {
+  DeviceState,
+  selectDeviceById,
+  updateDevice,
+} from '../../Store/reducers';
 import { useSocket } from '../../Hooks';
-import { DeviceExt } from '../RoomDetail/Device';
 
 export enum AirConditionerMode {
   COOL = 'Cool',
@@ -28,17 +30,17 @@ const MIN_TEMP = 16;
 export const AirConditionerScreen = ({
   id,
   name,
-  value,
+  // value,
   navigation,
-  setDeviceArray,
 }: {
   id: string;
   name: string;
   value: { value: number; status: boolean; mode: AirConditionerMode };
   navigation: any;
-  setDeviceArray: React.Dispatch<React.SetStateAction<DeviceExt[]>>;
 }) => {
   const theme = useAppTheme();
+  const airCon = useAppSelector(selectDeviceById(id)) as DeviceState;
+  const { value } = airCon;
   const [currentValue, setCurrentValue] = React.useState(value.value);
   const [isOn, setIsOn] = React.useState(value.status);
   const [currentMode, setCurrentMode] = React.useState(value.mode);
@@ -71,34 +73,14 @@ export const AirConditionerScreen = ({
         deviceId: string;
         value: string;
       };
-      // { value: number; status: boolean; mode: AirConditionerMode }
       if (deviceId === id) {
         setCurrentValue(JSON.parse(value).value);
         setIsOn(JSON.parse(value).status);
         setCurrentMode(JSON.parse(value).mode);
-        handleSetDeviceArray(JSON.parse(value).value, 'value');
-        handleSetDeviceArray(JSON.parse(value).status, 'status');
-        handleSetDeviceArray(JSON.parse(value).mode, 'mode');
+        dispatch(updateDevice({ id, value: JSON.parse(value), field: 'all' }));
       }
     }
   }, [message]);
-
-  const handleSetDeviceArray = (val: any, field: string) => {
-    setDeviceArray((prev: any) =>
-      prev.map((device: DeviceExt) => {
-        if (device.device_id === id) {
-          return {
-            ...device,
-            value: {
-              ...device.value,
-              [field]: val,
-            },
-          };
-        }
-        return device;
-      }),
-    );
-  };
 
   const onPressPlus = () => {
     if (!socketInstance || !isConnected) {
@@ -114,7 +96,6 @@ export const AirConditionerScreen = ({
           field: 'value',
         }),
       );
-      handleSetDeviceArray(currentValue + 1, 'value');
       socketInstance.emit('control', {
         deviceId: id,
         value: { ...value, value: currentValue + 1 },
@@ -123,6 +104,8 @@ export const AirConditionerScreen = ({
   };
 
   const onPressMinus = () => {
+    if (!isOn) return;
+    
     if (!socketInstance || !isConnected) {
       console.log('Socket is not connected');
       return;
@@ -132,14 +115,13 @@ export const AirConditionerScreen = ({
       dispatch(
         updateDevice({
           id,
-          value: { ...value, value: currentValue + 1 },
+          value: { value: currentValue - 1 },
           field: 'value',
         }),
       );
-      handleSetDeviceArray(currentValue - 1, 'value');
       socketInstance.emit('control', {
         deviceId: id,
-        value: { ...value, value: value },
+        value: { ...value, value: currentValue - 1 },
       });
     }
   };
@@ -157,7 +139,6 @@ export const AirConditionerScreen = ({
         field: 'status',
       }),
     );
-    handleSetDeviceArray(!isOn, 'status');
     socketInstance.emit('control', {
       deviceId: id,
       value: { ...value, status: !isOn },
@@ -177,7 +158,6 @@ export const AirConditionerScreen = ({
         field: 'mode',
       }),
     );
-    handleSetDeviceArray(mode, 'mode');
     socketInstance.emit('control', {
       deviceId: id,
       value: { ...value, mode: mode },
@@ -241,9 +221,7 @@ export const AirConditionerScreen = ({
         }}
       >
         <TouchableOpacity
-          onPress={() => {
-            isOn && onPressMinus();
-          }}
+          onPress={onPressMinus}
           // activeOpacity={2}
           style={{ padding: 10 }} // Thêm padding để mở rộng vùng nhấn
         >
