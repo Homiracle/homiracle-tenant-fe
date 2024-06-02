@@ -38,152 +38,58 @@ export const DeviceComponent = ({
   id: number;
   navigation: any;
 }) => {
-  // constants
-
   // hooks
   const theme = useAppTheme();
-  // const [deviceArray, setDeviceArray] = useState<DeviceExt[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const dispatch = useAppDispatch();
   const deviceArray = useAppSelector(selectDeviceList);
 
-  /**
-   * Fetch device data
-   */
-  const {
-    data: deviceData,
-    isSuccess: deviceSuccess,
-    isLoading: deviceLoading,
-    error: deviceError,
-  } = useGetDevicesQuery(id);
+  const { data: deviceData, isSuccess: deviceSuccess } = useGetDevicesQuery(id);
 
-  const [getDevices, { isSuccess: _deviceSuccess, data: _deviceData }] =
-    useLazyGetDevicesQuery();
-
-  /**
-   * Fetch iot data from iot server
-   */
-  const [
-    getDataIotDevices,
-    {
-      data: iotValue,
-      isSuccess: iotSuccess,
-      isLoading: iotLoading,
-      error: iotError,
-    },
-  ] = useLazyGetDataIotDevicesQuery();
-
-  const calculate = (deviceList: DeviceState[]) => {
-    if (deviceArray.length > 0) {
-      let sumE = 0;
-      let sumH = 0;
-      let sumT = 0;
-      let sumW = 0;
-
-      for (const device of deviceList) {
-        switch (device.type) {
-          case DeviceType.ELECTRIC_METER:
-            device.value && (sumE += device.value.value);
-            break;
-
-          case DeviceType.WATER_METER:
-            device.value && (sumW += device.value.value);
-            break;
-
-          default:
-            break;
-        }
-      }
-
-      return [
-        Math.round(sumE),
-        Math.round(sumH),
-        Math.round(sumT),
-        Math.round(sumW),
-      ];
-    }
-    return [0, 0, 0, 0];
-  };
-
-  /**
-   * listen to device data change
-   */
+  const [getDataIotDevices, { data: iotData, isSuccess: iotSuccess }] =
+    useLazyGetDataIotDevicesQuery();
 
   useEffect(() => {
     if (deviceSuccess && deviceData) {
-      const devices = deviceData.map(device => {
-        let value = {};
+      const fetchIotData = async () => {
+        const devicesWithIotData = await Promise.all(
+          deviceData.map(async device => {
+            const iotResponse = await getDataIotDevices(
+              device.device_id as string,
+            ).unwrap();
+            let value = iotResponse.value || { value: 0 };
 
-        switch (device.type) {
-          case DeviceType.ELECTRIC_METER:
-          case DeviceType.WATER_METER:
-            value = { value: 0 };
-            break;
+            switch (device.type) {
+              case DeviceType.AIR_CONDITIONER:
+                value = iotResponse.value || {
+                  value: 16,
+                  status: false,
+                  mode: AirConditionerMode.COOL,
+                };
+                break;
+              case DeviceType.FAN:
+              case DeviceType.LIGHT:
+                value = iotResponse.value || { status: false };
+                break;
+            }
 
-          case DeviceType.AIR_CONDITIONER:
-            value = { value: 16, status: false, mode: AirConditionerMode.COOL};
-            break;
+            return {
+              id: device.device_id,
+              name: device.name,
+              type: device.type,
+              value: value,
+            };
+          }),
+        );
 
-          case DeviceType.FAN:
-            value = { status: false };
-            break;
+        devicesWithIotData.forEach(device => dispatch(setDevice(device as DeviceState)));
+        setDataLoaded(true);
+      };
 
-          case DeviceType.LIGHT:
-            value = { status: false };
-            break;
-
-          default:
-            break;
-        }
-
-        return {
-          id: device.device_id,
-          name: device.name,
-          type: device.type,
-          value: value,
-        };
-      }) as DeviceState[];
-
-      if (devices.length > 0) {
-        for (const device of devices) {
-          dispatch(setDevice(device));
-        }
-      }
-      setDataLoaded(true);
-      // runPromise(devices);
+      fetchIotData();
     }
-  }, [deviceSuccess, deviceData]);
+  }, [deviceSuccess, deviceData, getDataIotDevices, dispatch]);
 
-  useEffect(() => {
-    if (_deviceSuccess && _deviceData) {
-      setDataLoaded(false);
-      console.log(deviceArray);
-      const devices = _deviceData.map(device => {
-        const index = deviceArray.findIndex(d => d.id === device.device_id);
-        if (index === -1) {
-          return {
-            id: device.device_id,
-            name: device.name,
-            type: device.type,
-            value: null,
-          };
-        } else {
-          return deviceArray[index];
-        }
-      }) as DeviceState[];
-      if (devices.length > 0) {
-        for (const device of devices) {
-          dispatch(setDevice(device));
-        }
-      }
-      // setDataLoaded(true);
-      // runPromise(devices);
-    }
-  }, [_deviceSuccess, _deviceData]);
-
-  /**
-   * listen to iot data change
-   */
   const {
     socketInstance,
     message,
@@ -192,7 +98,6 @@ export const DeviceComponent = ({
     disconnectSocket,
   } = useSocket();
 
-  // Handle socket reconnection using useFocusEffect
   useFocusEffect(
     useCallback(() => {
       console.log('Connecting to socket');
@@ -208,18 +113,13 @@ export const DeviceComponent = ({
   useEffect(() => {
     if (message && dataLoaded) {
       const { deviceId, value } = message;
-      console.log('🚀 ~ useEffect ~ value:', value);
       dispatch(
         updateDevice({ id: deviceId, value: JSON.parse(value), field: 'all' }),
       );
     }
-  }, [message]);
+  }, [message, dataLoaded, dispatch]);
 
-  /**
-   * handle on switch
-   */
   const handleOnSwitch = (value: boolean, deviceId: string) => {
-    // console.log('🚀 ~ handleOnSwitch ~ value:', value);
     if (!socketInstance || !isConnected) {
       console.log('Socket is not connected');
       return;
@@ -235,13 +135,28 @@ export const DeviceComponent = ({
     });
   };
 
-  // console.log('🚀 ~ deviceArray:', deviceArray);
+  const calculate = (deviceList: DeviceState[]) => {
+    let sumE = 0;
+    let sumW = 0;
+
+    for (const device of deviceList) {
+      switch (device.type) {
+        case DeviceType.ELECTRIC_METER:
+          device.value && (sumE += device.value.value);
+          break;
+        case DeviceType.WATER_METER:
+          device.value && (sumW += device.value.value);
+          break;
+      }
+    }
+
+    return [Math.round(sumE), Math.round(sumW)];
+  };
+
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      // Cập nhật dữ liệu mới
-      const devices = getDevices(id);
       setRefreshing(false);
     }, 2000);
   };
@@ -252,13 +167,13 @@ export const DeviceComponent = ({
         paddingHorizontal: wp(2),
         paddingBottom: hp(2),
       }}
-      // refreshControl={
-      //   <RefreshControl
-      //     refreshing={refreshing}
-      //     onRefresh={onRefresh}
-      //     colors={[theme.colors.primary]}
-      //   />
-      // }
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[theme.colors.primary]}
+        />
+      }
     >
       <View
         style={{
@@ -270,33 +185,33 @@ export const DeviceComponent = ({
       >
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: wp(2) }}>
           {deviceArray.map((device, index) => {
-            switch (device.type) {
-              case DeviceType.ELECTRIC_METER:
-                return (
-                  <CardCustom
-                    key={index}
-                    deviceId={device.id}
-                    title='Điện'
-                    value={calculate(deviceArray)[0]}
-                    unit='kWh'
-                    icon='lightning-bolt-outline'
-                  />
-                );
+            if (
+              device.type === DeviceType.ELECTRIC_METER ||
+              device.type === DeviceType.WATER_METER
+            ) {
+              const [sumE, sumW] = calculate(deviceArray);
+              const value =
+                device.type === DeviceType.ELECTRIC_METER ? sumE : sumW;
+              const unit =
+                device.type === DeviceType.ELECTRIC_METER ? 'kWh' : 'm3';
+              const icon =
+                device.type === DeviceType.ELECTRIC_METER
+                  ? 'lightning-bolt-outline'
+                  : 'water-outline';
+              const title = device.type === DeviceType.ELECTRIC_METER ? 'Điện' : 'Nước';
 
-              case DeviceType.WATER_METER:
-                return (
-                  <CardCustom
-                    deviceId={device.id}
-                    title='Nước'
-                    value={calculate(deviceArray)[3]}
-                    unit='m3'
-                    icon='water-outline'
-                  />
-                );
-
-              default:
-                return <></>;
+              return (
+                <CardCustom
+                  key={index}
+                  deviceId={device.id}
+                  title={title}
+                  value={value}
+                  unit={unit}
+                  icon={icon}
+                />
+              );
             }
+            return null;
           })}
         </View>
       </View>
@@ -317,55 +232,28 @@ export const DeviceComponent = ({
           }}
         >
           {deviceArray.map((device, index) => {
-            switch (device.type) {
-              case DeviceType.LIGHT:
-                return (
-                  <CardCustomForControlledDevice
-                    key={index}
-                    deviceId={device.id}
-                    deviceType={device.type}
-                    title={device.name}
-                    value={device.value?.status || false}
-                    onValueChange={(value: boolean) =>
-                      handleOnSwitch(value, device.id)
-                    }
-                    navigation={navigation}
-                    // setDeviceArray={setDeviceArray}
-                  />
-                );
-              case DeviceType.FAN:
-                return (
-                  <CardCustomForControlledDevice
-                    key={index}
-                    deviceId={device.id}
-                    deviceType={device.type}
-                    title={device.name}
-                    value={device.value?.status || false}
-                    onValueChange={(value: boolean) =>
-                      handleOnSwitch(value, device.id)
-                    }
-                    navigation={navigation}
-                    // setDeviceArray={setDeviceArray}
-                  />
-                );
-              case DeviceType.AIR_CONDITIONER:
-                return (
-                  <CardCustomForControlledDevice
-                    key={index}
-                    deviceId={device.id}
-                    deviceType={device.type}
-                    title={device.name}
-                    value={device.value?.status || false}
-                    onValueChange={(value: boolean) =>
-                      handleOnSwitch(value, device.id)
-                    }
-                    navigation={navigation}
-                    // setDeviceArray={setDeviceArray}
-                  />
-                );
-              default:
-                return <></>;
+            if (
+              [
+                DeviceType.LIGHT,
+                DeviceType.FAN,
+                DeviceType.AIR_CONDITIONER,
+              ].includes(device.type)
+            ) {
+              return (
+                <CardCustomForControlledDevice
+                  key={index}
+                  deviceId={device.id}
+                  deviceType={device.type}
+                  title={device.name}
+                  value={device.value?.status || false}
+                  onValueChange={(value: boolean) =>
+                    handleOnSwitch(value, device.id)
+                  }
+                  navigation={navigation}
+                />
+              );
             }
+            return null;
           })}
         </View>
       </View>
