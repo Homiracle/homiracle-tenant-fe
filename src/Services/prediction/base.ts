@@ -14,7 +14,7 @@ const baseQuery = fetchBaseQuery({
 
 const baseQueryWithInterceptor = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: {}) => {
   let result = await baseQuery(args, api, extraOptions);
-  // console.log('🚀 ~ >= ~ result:', JSON.stringify(result));
+  console.log('🚀 ~ >= ~ result:', JSON.stringify(result));
   if (result.error?.status === 401) {
     // here you can deal with 401 error
   }

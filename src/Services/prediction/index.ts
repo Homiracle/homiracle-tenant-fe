@@ -8,7 +8,7 @@ const predictionApi = predictionAPI.injectEndpoints({
         room_id: string;
         end_date: string;
       }) => ({
-        url: `api/forecast?user_id=${params.user_id}&room_id=${params.room_id}&end_date=${params.end_date}`,
+        url: `forecast?user_id=${params.user_id}&room_id=${params.room_id}&end_date=${params.end_date}`,
         method: 'GET',
       }),
       providesTags: ['PredictionData'],
