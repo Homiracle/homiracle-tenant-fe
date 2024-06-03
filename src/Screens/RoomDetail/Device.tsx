@@ -21,6 +21,7 @@ import {
   DeviceState,
   selectDeviceList,
   setDevice,
+  setDeviceArray,
   updateDevice,
 } from '../../Store/reducers';
 import { AirConditionerMode } from '../DeviceDetail/AirConditionerScreen';
@@ -82,7 +83,8 @@ export const DeviceComponent = ({
           }),
         );
 
-        devicesWithIotData.forEach(device => dispatch(setDevice(device as DeviceState)));
+        // devicesWithIotData.forEach(device => dispatch(setDevice(device as DeviceState)));
+        dispatch(setDeviceArray(devicesWithIotData as DeviceState[]));
         setDataLoaded(true);
       };
 

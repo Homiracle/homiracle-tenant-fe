@@ -1,6 +1,6 @@
 export const Config = {
   API_URL: process.env.API_URL || 'https://api-homiracle.up.railway.app/',
   IOT_API_URL: process.env.API_URL || 'https://iot-server-homiracle.up.railway.app/',
-  PREDICTION_URL: process.env.API_URL || 'http://127.0.0.1:8000/',
+  PREDICTION_URL: process.env.API_URL || 'https://homiracle.hpcc.vn/ml/api/',
 };
  
